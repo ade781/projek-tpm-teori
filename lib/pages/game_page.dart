@@ -1,10 +1,9 @@
-
-
 import 'package:flutter/material.dart';
-import 'dart:math'; // Untuk memilih kata secara acak
+import 'dart:math';
 import '../models/word_model.dart';
 import '../services/word_service.dart';
 import '../models/game_state.dart';
+import '../models/letter_status.dart';
 import '../widgets/game_board.dart';
 import '../widgets/keyboard.dart';
 
@@ -16,247 +15,228 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  // Instance dari WordService untuk mengambil data.
   final WordService _wordService = WordService();
-  // State permainan saat ini.
   GameState _gameState = GameState(status: GameStatus.loading);
-  // Daftar semua kata yang diambil dari API.
   List<WordModel> _allWords = [];
-
-  // Alfabet untuk keyboard.
-  final List<String> _alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  String _currentGuess = ''; // Menyimpan kata yang sedang diketik
+  final int _wordLength = 5; // Panjang kata yang valid
+  final int _maxAttempts = 6; // Maksimal percobaan
 
   @override
   void initState() {
     super.initState();
-    // Memuat kata-kata saat halaman pertama kali dibuka.
     _initializeGame();
   }
 
-  // Fungsi untuk menginisialisasi atau mereset permainan.
   Future<void> _initializeGame() async {
-    // Set status menjadi loading.
-    if (mounted) {
-      // Pastikan widget masih ada di tree
-      setState(() {
-        _gameState = GameState(status: GameStatus.loading);
-      });
-    }
-
+    setState(() => _gameState = GameState(status: GameStatus.loading));
     try {
-      // Mengambil semua kata dari service.
-      _allWords = await _wordService.fetchWords();
-      if (!mounted) return; // Cek lagi setelah await
+      // Ambil kata-kata, filter yang panjangnya 5 huruf
+      var fetchedWords = await _wordService.fetchWords();
+      _allWords =
+          fetchedWords.where((w) => w.kata.length == _wordLength).toList();
 
+      if (!mounted) return;
       if (_allWords.isEmpty) {
-        // Jika tidak ada kata yang didapat, set status error.
-        setState(() {
-          _gameState = GameState(status: GameStatus.error);
-        });
+        setState(() => _gameState = GameState(status: GameStatus.error));
         return;
       }
-      // Memulai permainan baru dengan kata acak.
       _startNewRound();
     } catch (e) {
-      // Jika terjadi error saat fetch, set status error.
-      print('Error initializing game: $e');
-      if (mounted) {
-        // Pastikan widget masih ada di tree
-        setState(() {
-          _gameState = GameState(status: GameStatus.error);
-        });
-      }
+      if (mounted)
+        setState(() => _gameState = GameState(status: GameStatus.error));
     }
   }
 
-  // Fungsi untuk memulai ronde baru.
   void _startNewRound() {
-    if (_allWords.isEmpty) return; // Pastikan ada kata
-
-    // Pilih kata acak dari daftar kata.
+    if (_allWords.isEmpty) return;
     final Random random = Random();
     final WordModel randomWord = _allWords[random.nextInt(_allWords.length)];
+    print('Kata baru: ${randomWord.kata.toUpperCase()}');
 
-    print('Kata baru untuk ditebak: ${randomWord.kata}'); // Untuk debugging
+    setState(() {
+      _currentGuess = '';
+      _gameState = GameState(
+        currentWord: randomWord,
+        status: GameStatus.playing,
+      );
+    });
+  }
 
-    // Set state permainan baru.
-    if (mounted) {
-      // Pastikan widget masih ada di tree
-      setState(() {
-        _gameState = GameState(
-          currentWord: randomWord,
-          guessedLetters: {}, // Kosongkan huruf yang sudah ditebak
-          remainingAttempts: 6, // Reset sisa percobaan
-          status: GameStatus.playing,
-        );
-      });
+  void _onLetterPressed(String letter) {
+    if (_gameState.status != GameStatus.playing) return;
+    if (_currentGuess.length < _wordLength) {
+      setState(() => _currentGuess += letter);
     }
   }
 
-  // Fungsi yang dipanggil ketika sebuah huruf ditekan pada keyboard.
-  void _onLetterPressed(String letter) {
+  void _onBackspacePressed() {
+    if (_gameState.status != GameStatus.playing) return;
+    if (_currentGuess.isNotEmpty) {
+      setState(
+        () =>
+            _currentGuess = _currentGuess.substring(
+              0,
+              _currentGuess.length - 1,
+            ),
+      );
+    }
+  }
+
+  void _onEnterPressed() {
     if (_gameState.status != GameStatus.playing ||
-        _gameState.currentWord == null) {
-      return; // Jangan lakukan apa-apa jika game tidak sedang berjalan atau tidak ada kata
+        _gameState.currentWord == null)
+      return;
+    if (_currentGuess.length != _wordLength) {
+      // Opsional: Tampilkan pesan bahwa kata harus 5 huruf
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Kata harus terdiri dari 5 huruf!'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+      return;
     }
 
-    final String currentWordString = _gameState.currentWord!.kata.toUpperCase();
-    final newGuessedLetters = Set<String>.from(_gameState.guessedLetters)
-      ..add(letter);
+    final newGuesses = List<String>.from(_gameState.guesses)
+      ..add(_currentGuess.toUpperCase());
+    final newKeyboardStatus = _updateKeyboardStatus(
+      _currentGuess.toUpperCase(),
+    );
 
-    int newRemainingAttempts = _gameState.remainingAttempts;
-    // Kurangi percobaan jika huruf yang ditebak tidak ada di kata dan belum pernah ditebak salah.
-    // Pengecekan ini untuk memastikan sisa nyawa tidak berkurang untuk huruf yang sama yang salah ditebak berulang kali.
-    if (!currentWordString.contains(letter) &&
-        !_gameState.guessedLetters.contains(letter)) {
-      newRemainingAttempts--;
-    }
-
-    // Cek apakah pemain menang.
-    bool hasWon = true;
-    for (var char in currentWordString.split('')) {
-      if (!newGuessedLetters.contains(char)) {
-        hasWon = false;
-        break;
-      }
-    }
-
+    // Cek status menang atau kalah
     GameStatus newStatus = _gameState.status;
-    if (hasWon) {
+    if (_currentGuess.toUpperCase() ==
+        _gameState.currentWord!.kata.toUpperCase()) {
       newStatus = GameStatus.won;
-    } else if (newRemainingAttempts <= 0) {
+    } else if (newGuesses.length >= _maxAttempts) {
       newStatus = GameStatus.lost;
     }
 
-    // Update state permainan.
-    if (mounted) {
-      // Pastikan widget masih ada di tree
-      setState(() {
-        _gameState = _gameState.copyWith(
-          guessedLetters: newGuessedLetters,
-          remainingAttempts: newRemainingAttempts,
-          status: newStatus,
-        );
-      });
+    setState(() {
+      _gameState = _gameState.copyWith(
+        guesses: newGuesses,
+        status: newStatus,
+        keyboardStatus: newKeyboardStatus,
+      );
+      _currentGuess = ''; // Reset kata yang sedang diketik
+    });
+  }
+
+  Map<String, LetterStatus> _updateKeyboardStatus(String guess) {
+    final newStatus = Map<String, LetterStatus>.from(_gameState.keyboardStatus);
+    final correctWord = _gameState.currentWord!.kata.toUpperCase();
+
+    for (int i = 0; i < guess.length; i++) {
+      final letter = guess[i];
+      final currentStatus = newStatus[letter];
+
+      if (correctWord[i] == letter) {
+        newStatus[letter] = LetterStatus.inWordCorrectLocation;
+      } else if (correctWord.contains(letter)) {
+        // Jangan downgrade dari 'hijau' ke 'kuning'
+        if (currentStatus != LetterStatus.inWordCorrectLocation) {
+          newStatus[letter] = LetterStatus.inWordWrongLocation;
+        }
+      } else {
+        newStatus[letter] = LetterStatus.notInWord;
+      }
     }
+    return newStatus;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // AppBar aplikasi.
-      appBar: AppBar(
-        title: const Text('Tebak Kata TPM'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          // Tombol untuk mereset permainan.
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _initializeGame, // Memanggil fungsi reset
-            tooltip: 'Mulai Ulang',
-          ),
-        ],
+    // Ganti tema dasar agar lebih gelap dan cocok
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF121213),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          brightness: Brightness.dark,
+        ),
       ),
-      // Body utama aplikasi.
-      body: Center(
-        child:
-            _buildGameContent(), // Memanggil fungsi untuk membangun konten game
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tebak Kata (Katla)'),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: _startNewRound,
+              tooltip: 'Mulai Ulang',
+            ),
+          ],
+        ),
+        body: _buildGameContent(),
       ),
     );
   }
 
-  // Fungsi untuk membangun konten utama permainan berdasarkan state.
   Widget _buildGameContent() {
     switch (_gameState.status) {
       case GameStatus.loading:
-        // Tampilkan indikator loading jika data sedang dimuat.
-        return const CircularProgressIndicator();
+        return const Center(child: CircularProgressIndicator());
       case GameStatus.error:
-        // Tampilkan pesan error jika terjadi kesalahan.
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Gagal memuat kata atau terjadi kesalahan jaringan. Silakan periksa koneksi Anda dan coba lagi.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('Gagal memuat kata.', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _initializeGame,
+                child: const Text('Coba Lagi'),
               ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _initializeGame,
-              child: const Text('Coba Lagi'),
-            ),
-          ],
+            ],
+          ),
         );
       case GameStatus.playing:
       case GameStatus.won:
       case GameStatus.lost:
-        // Tampilkan UI permainan jika sedang bermain, menang, atau kalah.
         if (_gameState.currentWord == null) {
-          // Fallback jika currentWord null meskipun statusnya playing.
-          // Ini seharusnya tidak terjadi jika logika _startNewRound benar.
-          return const Text('Terjadi kesalahan: Kata saat ini tidak tersedia.');
+          return const Center(
+            child: Text('Terjadi kesalahan: Kata tidak tersedia.'),
+          );
         }
         return Padding(
-          // Menambahkan Padding ke Column utama
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceAround, // Distribusi ruang
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              // Informasi sisa percobaan.
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  'Sisa Percobaan: ${_gameState.remainingAttempts}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              // Widget untuk menampilkan papan permainan (kotak-kotak huruf).
+              const SizedBox(height: 10),
               GameBoard(
-                word: _gameState.currentWord!.kata.toUpperCase(),
-                guessedLetters: _gameState.guessedLetters,
+                guesses: _gameState.guesses,
+                currentGuess: _currentGuess,
+                currentAttempt: _gameState.attempts,
+                correctWord: _gameState.currentWord!.kata,
               ),
-              // Tampilkan pesan jika menang atau kalah.
               if (_gameState.status == GameStatus.won)
                 _buildGameEndMessage('Selamat, Anda Menang! 🎉'),
               if (_gameState.status == GameStatus.lost)
                 _buildGameEndMessage(
                   'Anda Kalah! Kata yang benar: ${_gameState.currentWord!.kata.toUpperCase()}',
                 ),
-              // Widget untuk menampilkan keyboard.
-              // Hanya aktifkan keyboard jika permainan sedang berlangsung.
+              const Spacer(),
               Keyboard(
-                alphabet: _alphabet,
-                guessedLetters: _gameState.guessedLetters,
-                onLetterPressed:
-                    _gameState.status == GameStatus.playing
-                        ? _onLetterPressed
-                        : (
-                          String letter,
-                        ) {}, 
-                isEnabled: _gameState.status == GameStatus.playing,
+                keyStatus: _gameState.keyboardStatus,
+                onLetterPressed: _onLetterPressed,
+                onEnterPressed: _onEnterPressed,
+                onBackspacePressed: _onBackspacePressed,
               ),
+              const SizedBox(height: 20),
             ],
           ),
         );
-
     }
   }
 
-  // Widget untuk menampilkan pesan akhir permainan (menang/kalah).
   Widget _buildGameEndMessage(String message) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20.0),
       child: Column(
-        mainAxisSize:
-            MainAxisSize.min, // Agar Column mengambil ruang seperlunya
         children: [
           Text(
             message,
@@ -265,18 +245,14 @@ class _GamePageState extends State<GamePage> {
               fontWeight: FontWeight.bold,
               color:
                   _gameState.status == GameStatus.won
-                      ? Colors.green.shade700
-                      : Colors.red.shade700,
+                      ? Colors.green
+                      : Colors.red,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-              textStyle: const TextStyle(fontSize: 16),
-            ),
-            onPressed: _startNewRound, // Tombol untuk memulai ronde baru
+            onPressed: _startNewRound,
             child: const Text('Main Lagi'),
           ),
         ],

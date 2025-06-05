@@ -1,45 +1,50 @@
 // lib/models/game_state.dart
-// Komentar: Mendefinisikan state atau kondisi dari permainan.
-// Untuk saat ini, kita buat placeholder kosong. Akan kita lengkapi nanti.
+// State permainan dirombak untuk mendukung mekanik seperti Wordle/Katla.
 
-import '../models/word_model.dart'; // Impor WordModel karena GameState mungkin membutuhkannya
+import '../models/word_model.dart';
+import 'letter_status.dart'; // Impor enum yang baru dibuat
 
 class GameState {
-  // Properti untuk menyimpan kata yang sedang ditebak.
+  // Kata yang harus ditebak.
   final WordModel? currentWord;
-  // Properti untuk menyimpan huruf-huruf yang sudah ditebak oleh pemain.
-  final Set<String> guessedLetters;
-  // Properti untuk menyimpan jumlah sisa percobaan.
-  final int remainingAttempts;
-  // Properti untuk menyimpan status permainan (misalnya, playing, won, lost).
+  // Daftar kata yang sudah disubmit oleh pemain.
+  final List<String> guesses;
+  // Status permainan (misalnya, playing, won, lost).
   final GameStatus status;
+  // Menyimpan status warna untuk setiap tombol keyboard.
+  final Map<String, LetterStatus> keyboardStatus;
 
   // Konstruktor GameState.
   GameState({
     this.currentWord,
-    this.guessedLetters = const {},
-    this.remainingAttempts = 6, // Contoh: 6 kali percobaan
+    this.guesses = const [],
     this.status = GameStatus.playing,
+    this.keyboardStatus = const {},
   });
 
+  // Jumlah percobaan yang sudah dilakukan adalah panjang dari list `guesses`.
+  int get attempts => guesses.length;
+
+  // Sisa percobaan (dari total 6).
+  int get remainingAttempts => 6 - attempts;
+
   // Method untuk membuat salinan GameState dengan beberapa perubahan.
-  // Ini berguna untuk manajemen state yang immutable.
   GameState copyWith({
     WordModel? currentWord,
-    Set<String>? guessedLetters,
-    int? remainingAttempts,
+    List<String>? guesses,
     GameStatus? status,
+    Map<String, LetterStatus>? keyboardStatus,
   }) {
     return GameState(
       currentWord: currentWord ?? this.currentWord,
-      guessedLetters: guessedLetters ?? this.guessedLetters,
-      remainingAttempts: remainingAttempts ?? this.remainingAttempts,
+      guesses: guesses ?? this.guesses,
       status: status ?? this.status,
+      keyboardStatus: keyboardStatus ?? this.keyboardStatus,
     );
   }
 }
 
-// Enum untuk status permainan.
+// Enum untuk status permainan (tidak ada perubahan di sini).
 enum GameStatus {
   playing, // Permainan sedang berlangsung
   won, // Pemain memenangkan permainan
