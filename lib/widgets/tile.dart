@@ -11,22 +11,19 @@ class GameTile extends StatelessWidget {
     this.status = LetterStatus.initial,
   });
 
-  // Fungsi untuk mendapatkan warna berdasarkan status
   Color _getBackgroundColor(BuildContext context) {
     switch (status) {
       case LetterStatus.inWordCorrectLocation:
-        return Colors.green.shade600; // Hijau
+        return Colors.green.shade600;
       case LetterStatus.inWordWrongLocation:
-        return Colors.amber.shade600; // Kuning
+        return Colors.amber.shade600;
       case LetterStatus.notInWord:
-        return Colors.grey.shade700; // Abu-abu gelap
+        return Colors.grey.shade700;
       case LetterStatus.initial:
-      default:
-        return Theme.of(context).scaffoldBackgroundColor; // Warna default
+        return Theme.of(context).scaffoldBackgroundColor;
     }
   }
 
-  // Fungsi untuk mendapatkan warna border
   Border _getBorder(BuildContext context) {
     if (status == LetterStatus.initial && letter.isEmpty) {
       return Border.all(color: Colors.grey.shade600, width: 2);
@@ -37,7 +34,7 @@ class GameTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 55, // Sedikit lebih besar
+      width: 55,
       height: 55,
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),

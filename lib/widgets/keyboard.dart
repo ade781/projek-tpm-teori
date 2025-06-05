@@ -1,6 +1,3 @@
-// lib/widgets/keyboard.dart
-// Keyboard virtual dengan tombol Enter, Backspace, dan pewarnaan status.
-
 import 'package:flutter/material.dart';
 import '../models/letter_status.dart';
 
@@ -10,7 +7,6 @@ class Keyboard extends StatelessWidget {
   final VoidCallback onEnterPressed;
   final VoidCallback onBackspacePressed;
 
-  // Layout keyboard QWERTY
   static const List<String> row1 = [
     'Q',
     'W',
@@ -54,7 +50,6 @@ class Keyboard extends StatelessWidget {
     required this.onBackspacePressed,
   });
 
-  // Fungsi untuk mendapatkan warna tombol keyboard
   Color _getKeyColor(String key, BuildContext context) {
     final status = keyStatus[key] ?? LetterStatus.initial;
     switch (status) {
@@ -65,7 +60,6 @@ class Keyboard extends StatelessWidget {
       case LetterStatus.notInWord:
         return Colors.grey.shade800;
       case LetterStatus.initial:
-      default:
         return Colors.grey.shade500;
     }
   }

@@ -1,3 +1,5 @@
+// lib/pages/game_page.dart
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../models/word_model.dart';
@@ -18,9 +20,9 @@ class _GamePageState extends State<GamePage> {
   final WordService _wordService = WordService();
   GameState _gameState = GameState(status: GameStatus.loading);
   List<WordModel> _allWords = [];
-  String _currentGuess = ''; // Menyimpan kata yang sedang diketik
-  final int _wordLength = 5; // Panjang kata yang valid
-  final int _maxAttempts = 6; // Maksimal percobaan
+  String _currentGuess = '';
+  final int _wordLength = 5;
+  final int _maxAttempts = 6;
 
   @override
   void initState() {
@@ -31,7 +33,6 @@ class _GamePageState extends State<GamePage> {
   Future<void> _initializeGame() async {
     setState(() => _gameState = GameState(status: GameStatus.loading));
     try {
-      // Ambil kata-kata, filter yang panjangnya 5 huruf
       var fetchedWords = await _wordService.fetchWords();
       _allWords =
           fetchedWords.where((w) => w.kata.length == _wordLength).toList();
@@ -52,7 +53,9 @@ class _GamePageState extends State<GamePage> {
     if (_allWords.isEmpty) return;
     final Random random = Random();
     final WordModel randomWord = _allWords[random.nextInt(_allWords.length)];
-    print('Kata baru: ${randomWord.kata.toUpperCase()}');
+    print(
+      'Kata baru: ${randomWord.kata.toUpperCase()}, Arti: ${randomWord.arti}',
+    );
 
     setState(() {
       _currentGuess = '';
@@ -88,7 +91,6 @@ class _GamePageState extends State<GamePage> {
         _gameState.currentWord == null)
       return;
     if (_currentGuess.length != _wordLength) {
-      // Opsional: Tampilkan pesan bahwa kata harus 5 huruf
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Kata harus terdiri dari 5 huruf!'),
@@ -104,7 +106,6 @@ class _GamePageState extends State<GamePage> {
       _currentGuess.toUpperCase(),
     );
 
-    // Cek status menang atau kalah
     GameStatus newStatus = _gameState.status;
     if (_currentGuess.toUpperCase() ==
         _gameState.currentWord!.kata.toUpperCase()) {
@@ -119,7 +120,7 @@ class _GamePageState extends State<GamePage> {
         status: newStatus,
         keyboardStatus: newKeyboardStatus,
       );
-      _currentGuess = ''; // Reset kata yang sedang diketik
+      _currentGuess = '';
     });
   }
 
@@ -134,7 +135,6 @@ class _GamePageState extends State<GamePage> {
       if (correctWord[i] == letter) {
         newStatus[letter] = LetterStatus.inWordCorrectLocation;
       } else if (correctWord.contains(letter)) {
-        // Jangan downgrade dari 'hijau' ke 'kuning'
         if (currentStatus != LetterStatus.inWordCorrectLocation) {
           newStatus[letter] = LetterStatus.inWordWrongLocation;
         }
@@ -147,7 +147,6 @@ class _GamePageState extends State<GamePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Ganti tema dasar agar lebih gelap dan cocok
     return Theme(
       data: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF121213),
@@ -213,12 +212,9 @@ class _GamePageState extends State<GamePage> {
                 currentAttempt: _gameState.attempts,
                 correctWord: _gameState.currentWord!.kata,
               ),
-              if (_gameState.status == GameStatus.won)
-                _buildGameEndMessage('Selamat, Anda Menang! 🎉'),
-              if (_gameState.status == GameStatus.lost)
-                _buildGameEndMessage(
-                  'Anda Kalah! Kata yang benar: ${_gameState.currentWord!.kata.toUpperCase()}',
-                ),
+              if (_gameState.status == GameStatus.won ||
+                  _gameState.status == GameStatus.lost)
+                _buildGameEndDialog(),
               const Spacer(),
               Keyboard(
                 keyStatus: _gameState.keyboardStatus,
@@ -233,27 +229,57 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  Widget _buildGameEndMessage(String message) {
+  Widget _buildGameEndDialog() {
+    final bool isWinner = _gameState.status == GameStatus.won;
+    final String title = isWinner ? 'Selamat, Anda Menang! 🎉' : 'Anda Kalah!';
+    final Color titleColor = isWinner ? Colors.green : Colors.red;
+    final String correctWord = _gameState.currentWord!.kata.toUpperCase();
+    final String meaning = _gameState.currentWord!.arti;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            message,
+            title,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color:
-                  _gameState.status == GameStatus.won
-                      ? Colors.green
-                      : Colors.red,
+              color: titleColor,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+          Text.rich(
+            TextSpan(
+              style: const TextStyle(fontSize: 18),
+              children: [
+                const TextSpan(text: 'Kata yang benar: '),
+                TextSpan(
+                  text: correctWord,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Arti: $meaning',
+            style: TextStyle(
+              fontSize: 16,
+              fontStyle: FontStyle.italic,
+              color: Colors.white.withOpacity(0.8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
             onPressed: _startNewRound,
-            child: const Text('Main Lagi'),
+            child: const Text('Main Lagi', style: TextStyle(fontSize: 16)),
           ),
         ],
       ),
