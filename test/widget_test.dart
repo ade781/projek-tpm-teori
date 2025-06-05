@@ -7,12 +7,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:projek_akhir_teori/app.dart';
 
-import 'package:projek_akhir_teori/main.dart';
+import 'package:projek_akhir_teori/main.dart'; // GANTI 'projek_akhir_teori' dengan nama paket aplikasi Anda jika berbeda
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
+    // GANTI MyApp() dengan widget utama aplikasi Anda jika berbeda (misalnya dari app.dart)
     await tester.pumpWidget(const MyApp());
 
     // Verify that our counter starts at 0.
