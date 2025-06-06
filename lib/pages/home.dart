@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';
 import 'package:projek_akhir_teori/pages/login_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
+import 'package:projek_akhir_teori/pages/map_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -61,6 +62,25 @@ class HomePage extends StatelessWidget {
                 // Navigasi ke halaman permainan
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => const GamePage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.map_outlined),
+              label: const Text('Info Tempat Ibadah'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal, // Contoh warna berbeda
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 30,
+                  vertical: 15,
+                ),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+              onPressed: () {
+                // Navigasi ke halaman peta
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const MapPage()),
                 );
               },
             ),

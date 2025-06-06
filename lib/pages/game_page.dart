@@ -1,5 +1,3 @@
-// lib/pages/game_page.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../models/word_model.dart';
@@ -8,6 +6,7 @@ import '../models/game_state.dart';
 import '../models/letter_status.dart';
 import '../widgets/game_board.dart';
 import '../widgets/keyboard.dart';
+import '../services/notification_service.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -28,6 +27,19 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     _initializeGame();
+  }
+
+  @override
+  void dispose() {
+    // Cek apakah game masih berjalan saat halaman ditutup
+    if (_gameState.status == GameStatus.playing) {
+      print('Game sedang berjalan. Menjadwalkan notifikasi dalam 30 detik.');
+      // Jadwalkan notifikasi untuk muncul setelah 30 detik
+      Future.delayed(const Duration(seconds: 5), () {
+        NotificationService.showGameReminderNotification();
+      });
+    }
+    super.dispose();
   }
 
   Future<void> _initializeGame() async {
