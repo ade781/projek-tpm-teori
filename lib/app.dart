@@ -1,28 +1,25 @@
+// lib/app.dart
 import 'package:flutter/material.dart';
-import 'pages/game_page.dart'; // Impor halaman permainan
+import 'pages/game_page.dart';
+import 'pages/login_page.dart'; // Impor halaman login Anda
 
 class MyApp extends StatelessWidget {
-  // Konstruktor untuk MyApp.
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   @override
   Widget build(BuildContext context) {
-    // MaterialApp adalah widget dasar untuk aplikasi berbasis Material Design.
     return MaterialApp(
-      // Judul aplikasi yang muncul di task manager, dll.
       title: 'Tebak Kata TPM',
-      // Konfigurasi tema aplikasi.
       theme: ThemeData(
-        // Skema warna utama aplikasi.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        // Mengaktifkan Material 3 untuk tampilan yang lebih modern.
         useMaterial3: true,
-        // Font default untuk aplikasi.
-        fontFamily: 'Poppins', // Anda bisa mengganti dengan font lain jika mau
+        fontFamily: 'Poppins',
       ),
-      // Halaman utama yang akan ditampilkan saat aplikasi pertama kali dibuka.
-      home: const GamePage(),
-      // Menyembunyikan banner debug di pojok kanan atas.
+
+      home: isLoggedIn ? const GamePage() : const LoginPage(),
+
       debugShowCheckedModeBanner: false,
     );
   }

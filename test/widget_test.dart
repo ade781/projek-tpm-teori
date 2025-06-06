@@ -1,32 +1,23 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// test/widget_test.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:projek_akhir_teori/app.dart';
 
-import 'package:projek_akhir_teori/main.dart'; // GANTI 'projek_akhir_teori' dengan nama paket aplikasi Anda jika berbeda
+// Hapus 'import 'package:projek_akhir_teori/main.dart';' karena tidak diperlukan di sini.
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    // GANTI MyApp() dengan widget utama aplikasi Anda jika berbeda (misalnya dari app.dart)
-    await tester.pumpWidget(const MyApp());
+  // Ubah deskripsi tes agar lebih relevan dengan aplikasi Anda, atau hapus jika tidak relevan.
+  testWidgets('Login page shows up when not logged in', (
+    WidgetTester tester,
+  ) async {
+    // --- PERBAIKAN DI SINI ---
+    // Sekarang kita berikan nilai untuk parameter 'isLoggedIn' yang wajib diisi.
+    await tester.pumpWidget(const MyApp(isLoggedIn: false));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verifikasi bahwa halaman login ditampilkan dengan benar.
+    // Cari widget TextField untuk username, contohnya.
+    expect(find.widgetWithText(TextField, 'Username'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Password'), findsOneWidget);
   });
 }
