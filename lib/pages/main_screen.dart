@@ -1,0 +1,36 @@
+// lib/pages/main_screen.dart
+import 'package:flutter/material.dart';
+import 'package:projek_akhir_teori/pages/home.dart';
+import 'package:projek_akhir_teori/pages/profile_page.dart';
+import 'package:projek_akhir_teori/widgets/bottom_navbar.dart';
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  int _selectedIndex = 0;
+
+  // Daftar halaman yang akan ditampilkan sesuai dengan tab navbar
+  static const List<Widget> _pages = <Widget>[HomePage(), ProfilePage()];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavbar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
