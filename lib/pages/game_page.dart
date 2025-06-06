@@ -157,7 +157,21 @@ class _GamePageState extends State<GamePage> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Tebak Kata (Katla)'),
+          title: ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback:
+                (bounds) => LinearGradient(
+                  colors: [Colors.cyan.shade300, Colors.purple.shade400],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(
+                  Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                ),
+            child: const Text(
+              'Lurufa',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+            ),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
@@ -216,6 +230,18 @@ class _GamePageState extends State<GamePage> {
                   _gameState.status == GameStatus.lost)
                 _buildGameEndDialog(),
               const Spacer(),
+              if (_gameState.status == GameStatus.playing)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    'MADE BY ADE7',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.white54,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
               Keyboard(
                 keyStatus: _gameState.keyboardStatus,
                 onLetterPressed: _onLetterPressed,

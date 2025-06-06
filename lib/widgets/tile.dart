@@ -34,8 +34,8 @@ class GameTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 55,
-      height: 55,
+      width: 65,
+      height: 65,
       decoration: BoxDecoration(
         color: _getBackgroundColor(context),
         border: _getBorder(context),

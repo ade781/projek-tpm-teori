@@ -46,7 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // Panggil service untuk update path di database
     await _authService.updateUserImagePath(pickedFile.path);
 
-    // Muat ulang data pengguna untuk refresh UI
+
     await _loadUserData();
   }
 
