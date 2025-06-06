@@ -1,7 +1,6 @@
-// lib/app.dart
 import 'package:flutter/material.dart';
-import 'pages/game_page.dart';
-import 'pages/login_page.dart'; // Impor halaman login Anda
+import 'pages/login_page.dart';
+import 'pages/home.dart';
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
@@ -18,7 +17,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
       ),
 
-      home: isLoggedIn ? const GamePage() : const LoginPage(),
+      home: isLoggedIn ? const LoginPage() : const HomePage(),
 
       debugShowCheckedModeBanner: false,
     );
