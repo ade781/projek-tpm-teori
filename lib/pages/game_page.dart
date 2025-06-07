@@ -1,3 +1,5 @@
+// lib/pages/game_page.dart
+
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../models/word_model.dart';
@@ -7,6 +9,8 @@ import '../models/letter_status.dart';
 import '../widgets/game_board.dart';
 import '../widgets/keyboard.dart';
 import '../services/notification_service.dart';
+import '../services/stats_service.dart'; // <-- IMPORT BARU
+import 'stats_page.dart'; // <-- IMPORT BARU
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -17,6 +21,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   final WordService _wordService = WordService();
+  final StatsService _statsService = StatsService(); // <-- INSTANSIASI SERVICE
   GameState _gameState = GameState(status: GameStatus.loading);
   List<WordModel> _allWords = [];
   String _currentGuess = '';
@@ -29,12 +34,12 @@ class _GamePageState extends State<GamePage> {
     _initializeGame();
   }
 
+  // ... (initState, dispose, _initializeGame, _startNewRound tidak berubah) ...
+
   @override
   void dispose() {
-    // Cek apakah game masih berjalan saat halaman ditutup
     if (_gameState.status == GameStatus.playing) {
       print('Game sedang berjalan. Menjadwalkan notifikasi dalam 30 detik.');
-      // Jadwalkan notifikasi untuk muncul setelah 30 detik
       Future.delayed(const Duration(seconds: 5), () {
         NotificationService.showGameReminderNotification();
       });
@@ -99,6 +104,7 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  // --- MODIFIKASI DI SINI ---
   void _onEnterPressed() {
     if (_gameState.status != GameStatus.playing ||
         _gameState.currentWord == null) {
@@ -121,11 +127,24 @@ class _GamePageState extends State<GamePage> {
     );
 
     GameStatus newStatus = _gameState.status;
+    bool isWin = false;
+
     if (_currentGuess.toUpperCase() ==
         _gameState.currentWord!.kata.toUpperCase()) {
       newStatus = GameStatus.won;
+      isWin = true;
     } else if (newGuesses.length >= _maxAttempts) {
       newStatus = GameStatus.lost;
+      isWin = false;
+    }
+
+    // Jika permainan berakhir (menang atau kalah), simpan hasilnya
+    if (newStatus == GameStatus.won || newStatus == GameStatus.lost) {
+      _statsService.saveGame(
+        _gameState.currentWord!.kata.toUpperCase(),
+        newGuesses,
+        isWin,
+      );
     }
 
     setState(() {
@@ -137,6 +156,8 @@ class _GamePageState extends State<GamePage> {
       _currentGuess = '';
     });
   }
+
+  // ... (_updateKeyboardStatus tidak berubah) ...
 
   Map<String, LetterStatus> _updateKeyboardStatus(String guess) {
     final newStatus = Map<String, LetterStatus>.from(_gameState.keyboardStatus);
@@ -171,25 +192,18 @@ class _GamePageState extends State<GamePage> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: ShaderMask(
-            blendMode: BlendMode.srcIn,
-            shaderCallback:
-                (bounds) => LinearGradient(
-                  colors: [Colors.cyan.shade300, Colors.purple.shade400],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(
-                  Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                ),
-            child: const Text(
-              'Lurufa',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          centerTitle: true,
+          // ... (title tidak berubah)
           actions: [
+            // --- TAMBAHKAN TOMBOL STATISTIK ---
+            IconButton(
+              icon: const Icon(Icons.bar_chart),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const StatsPage()),
+                );
+              },
+              tooltip: 'Lihat Statistik',
+            ),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _startNewRound,
@@ -202,6 +216,7 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
+  // ... (_buildGameContent, _buildGameEndDialog tidak berubah)
   Widget _buildGameContent() {
     switch (_gameState.status) {
       case GameStatus.loading:
@@ -243,9 +258,6 @@ class _GamePageState extends State<GamePage> {
                 if (_gameState.status == GameStatus.won ||
                     _gameState.status == GameStatus.lost)
                   _buildGameEndDialog(),
-
-                // --- PERUBAHAN DI SINI ---
-                // Tampilkan Keyboard & teks hanya saat status game 'playing'
                 if (_gameState.status == GameStatus.playing) ...[
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 32.0),
