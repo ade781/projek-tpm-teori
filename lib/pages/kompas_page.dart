@@ -59,7 +59,10 @@ class _KompasPageState extends State<KompasPage> {
             ),
             Text(
               _heading != null ? _getDirectionString(_heading!) : '',
-              style: TextStyle(fontSize: 24, color: Colors.grey.shade700),
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.grey.shade700.withAlpha((0.8 * 255).round()),
+              ), // Menggunakan withAlpha
             ),
           ],
         ),
@@ -84,6 +87,7 @@ class _KompasPageState extends State<KompasPage> {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
+                  // ignore: deprecated_member_use
                   color: Colors.black.withOpacity(0.2),
                   blurRadius: 10,
                   spreadRadius: 2,
