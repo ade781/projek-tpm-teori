@@ -55,13 +55,33 @@ class _WorldClockPageState extends State<WorldClockPage> {
           ),
         ),
         child: SafeArea(
-          child: ListView.builder(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: _timeService.timezones.length,
-            itemBuilder: (context, index) {
-              final timezoneInfo = _timeService.timezones[index];
-              return _buildClockCard(timezoneInfo);
-            },
+          // Menggunakan Column untuk menambahkan footer di bawah list
+          child: Column(
+            children: [
+              // ListView sekarang dibungkus dengan Expanded agar mengisi ruang yang tersedia
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0), // Padding bawah dihilangkan
+                  itemCount: _timeService.timezones.length,
+                  itemBuilder: (context, index) {
+                    final timezoneInfo = _timeService.timezones[index];
+                    return _buildClockCard(timezoneInfo);
+                  },
+                ),
+              ),
+              // --- PENAMBAHAN FOOTER DI SINI ---
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: Text(
+                  'MADE BY ADE7',
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -115,7 +135,7 @@ class _WorldClockPageState extends State<WorldClockPage> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
-                    fontWeight: FontWeight.w200, // Font tipis untuk jam
+                    fontWeight: FontWeight.w200, 
                   ),
                 ),
                 const SizedBox(height: 4),

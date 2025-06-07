@@ -1,5 +1,3 @@
-// lib/services/notification_service.dart
-
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -26,19 +24,15 @@ class NotificationService {
           iOS: initializationSettingsIOS,
         );
 
-    // Menambahkan callback untuk menangani saat notifikasi diklik
     await _notificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        // Di sini Anda bisa menambahkan logika navigasi jika diperlukan
-        // Misalnya: buka halaman game saat notifikasi diklik
         print('Notifikasi diklik dengan payload: ${response.payload}');
       },
     );
   }
 
   static Future<void> requestPermissions() async {
-    // ... (kode ini tidak berubah)
     final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
     await flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -98,7 +92,6 @@ class NotificationService {
       payload: 'game_page_reminder',
     );
   }
-
 
   static Future<String> _getImagePathFromAssets(String assetPath) async {
     final byteData = await rootBundle.load(assetPath);

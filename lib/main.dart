@@ -3,19 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:projek_akhir_teori/models/user_model.dart';
 import 'app.dart';
-import 'services/auth_service.dart';
+// Hapus import auth_service karena tidak diperlukan di sini lagi
 import 'services/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  tz.initializeTimeZones(); 
-
+  tz.initializeTimeZones();
 
   await dotenv.load(fileName: ".env");
 
-  // INISIALISASI NOTIFIKASI
   await NotificationService.init();
   await NotificationService.requestPermissions();
 
@@ -23,11 +21,12 @@ void main() async {
   if (!Hive.isAdapterRegistered(0)) {
     Hive.registerAdapter(UserAdapter());
   }
-
   await Hive.openBox<User>('users');
 
-  final authService = AuthService();
-  final bool isLoggedIn = await authService.isLoggedIn();
+  // Hapus logika pengecekan login dari sini
+  // final authService = AuthService();
+  // final bool isLoggedIn = await authService.isLoggedIn();
 
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  // Cukup jalankan MyApp
+  runApp(const MyApp());
 }
