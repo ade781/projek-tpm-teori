@@ -1,4 +1,3 @@
-// lib/widgets/bottom_navbar.dart
 import 'package:flutter/material.dart';
 
 class BottomNavbar extends StatelessWidget {
@@ -16,6 +15,10 @@ class BottomNavbar extends StatelessWidget {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.smart_toy_outlined),
+          label: 'Chatbot',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
       currentIndex: currentIndex,
