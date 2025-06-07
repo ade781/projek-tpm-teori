@@ -2,7 +2,10 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'package:projek_akhir_teori/pages/login_page.dart';
 import 'package:projek_akhir_teori/pages/main_screen.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
@@ -20,32 +23,71 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _startTimerAndNavigate();
+    _initializeApp();
   }
 
-  void _startTimerAndNavigate() {
-    Timer(const Duration(seconds: 4), () async {
-      final bool isLoggedIn = await _authService.isLoggedIn();
+  Future<void> _initializeApp() async {
+    // Memberi jeda agar animasi Lottie sempat terlihat
+    await Future.delayed(const Duration(seconds: 2));
 
-      // Gunakan 'mounted' untuk memastikan widget masih ada di tree
+    // Periksa koneksi dan navigasi sesuai hasilnya
+    _checkConnectivityAndNavigate();
+  }
+
+  Future<void> _checkConnectivityAndNavigate() async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+
+    if (!mounted) return;
+
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      _showConnectionDialog();
+    } else {
+      // Koneksi berhasil, lanjutkan ke alur aplikasi normal
+      final bool isLoggedIn = await _authService.isLoggedIn();
       if (!mounted) return;
 
-      // Navigasi ke halaman yang sesuai
-      // pushReplacementNamed agar pengguna tidak bisa kembali ke splash screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder:
               (context) => isLoggedIn ? const MainScreen() : const LoginPage(),
         ),
       );
-    });
+    }
+  }
+
+  void _showConnectionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Dialog tidak bisa ditutup
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Koneksi Diperlukan'),
+          content: const Text(
+            'Aplikasi ini membutuhkan koneksi internet. Mohon aktifkan data atau WiFi Anda dan coba lagi.',
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: const Text('Coba Lagi'),
+              onPressed: () {
+                // ## INI BAGIAN UTAMANYA ##
+                // Navigasi untuk "me-restart" ke SplashScreen
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SplashScreen()),
+                  (Route<dynamic> route) =>
+                      false, // Hapus semua route sebelumnya
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        // Memberi latar belakang gradien yang serasi dengan tema aplikasi
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -60,7 +102,6 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Widget Lottie untuk menampilkan animasi dari file JSON
               Lottie.asset(
                 'assets/splash_loading.json',
                 width: 200,
@@ -68,12 +109,17 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Projek Akhir Teori',
+                'Projek Akhir',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white.withOpacity(0.9),
                 ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                'Teknologi Pemrograman Mobile',
+                style: TextStyle(fontSize: 16, color: Colors.white70),
               ),
             ],
           ),

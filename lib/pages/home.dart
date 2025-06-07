@@ -9,6 +9,7 @@ import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
 import 'package:projek_akhir_teori/pages/world_clock_page.dart';
 import 'package:projek_akhir_teori/services/aqi_service.dart';
 import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart'; // <-- PASTIKAN IMPORT INI ADA
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -60,8 +61,6 @@ class _HomePageState extends State<HomePage> {
             _buildHeader(),
             _buildAqiCard(),
             _buildOtherFeaturesTitle(),
-            // --- PERBAIKAN DI SINI ---
-            // Mengganti grid dengan list untuk mengatasi overflow
             _buildFeaturesList(),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
           ],
@@ -110,9 +109,16 @@ class _HomePageState extends State<HomePage> {
           future: _aqiFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 150,
-                child: Center(child: CircularProgressIndicator()),
+              // ## KODE BARU DI SINI ##
+              return SizedBox(
+                height: 250,
+                child: Center(
+                  child: Lottie.asset(
+                    'assets/aqi_loading.json',
+                    width: 250,
+                    height: 250,
+                  ),
+                ),
               );
             }
             if (snapshot.hasError) {
@@ -173,7 +179,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // --- PERBAIKAN: Menggunakan SliverList ---
   SliverList _buildFeaturesList() {
     final features = [
       {
@@ -218,7 +223,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // --- WIDGET BARU: untuk setiap item dalam list ---
   Widget _buildFeatureListItem(
     IconData icon,
     String title,
