@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:location/location.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -12,12 +14,10 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // State untuk data dan UI
+  // State untuk peta dan data
   bool _isLoading = true;
   List<Map<String, dynamic>> _allFeatures = [];
   final List<Marker> _filteredMarkers = [];
-
-  // --- PERUBAHAN 1: Menggunakan nilai baru untuk filter ---
   String _selectedAgama = 'Semua';
   final List<String> _agamaOptions = const [
     'Semua',
@@ -29,10 +29,74 @@ class _MapPageState extends State<MapPage> {
     'Lainnya',
   ];
 
+  // State untuk fitur lokasi
+  final MapController _mapController = MapController();
+  LocationData? _currentLocation;
+  StreamSubscription<LocationData>? _locationSubscription;
+
   @override
   void initState() {
     super.initState();
-    _loadIbadahData();
+    _loadDataAndLocation();
+  }
+
+  Future<void> _loadDataAndLocation() async {
+    await _loadIbadahData();
+    await _initializeLocation();
+  }
+
+  Future<void> _initializeLocation() async {
+    final location = Location();
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) return;
+    }
+
+    // --- PERBAIKAN: MINTA AKURASI TINGGI ---
+    // Baris ini meminta perangkat untuk memprioritaskan GPS untuk akurasi terbaik.
+    await location.changeSettings(accuracy: LocationAccuracy.high);
+
+    final locationData = await location.getLocation();
+    if (mounted) {
+      setState(() {
+        _currentLocation = locationData;
+      });
+      // Setelah lokasi pertama didapat, langsung pusatkan peta ke sana
+      _centerOnMyLocation();
+    }
+
+    _locationSubscription = location.onLocationChanged.listen((newLocation) {
+      if (mounted) {
+        setState(() {
+          _currentLocation = newLocation;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _centerOnMyLocation() {
+    if (_currentLocation != null) {
+      _mapController.move(
+        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+        17.0,
+      );
+    }
   }
 
   Future<void> _loadIbadahData() async {
@@ -68,13 +132,27 @@ class _MapPageState extends State<MapPage> {
       final properties = feature['properties'];
       if (properties == null) continue;
 
-      // Mengambil nilai agama dari JSON dan mengubahnya ke huruf kecil untuk perbandingan
-      final String agamaFromJson =
-          (properties['agama'] ?? 'Lainnya').toString().toLowerCase();
+      final String rawAgama =
+          (properties['religion'] ?? 'Lainnya').toString().trim().toLowerCase();
 
-      // Membandingkan dengan nilai filter yang juga diubah ke huruf kecil
-      if (_selectedAgama == 'Semua' ||
-          agamaFromJson == _selectedAgama.toLowerCase()) {
+      String normalizedAgama;
+      if (rawAgama.contains('islam') || rawAgama.contains('muslim')) {
+        normalizedAgama = 'muslim';
+      } else if (rawAgama.contains('christian') ||
+          rawAgama.contains('kristen')) {
+        normalizedAgama = 'christian';
+      } else if (rawAgama.contains('hindu')) {
+        normalizedAgama = 'hindu';
+      } else if (rawAgama.contains('buddhist') || rawAgama.contains('budha')) {
+        normalizedAgama = 'buddhist';
+      } else if (rawAgama.contains('jewish') || rawAgama.contains('yahudi')) {
+        normalizedAgama = 'jewish';
+      } else {
+        normalizedAgama = 'lainnya';
+      }
+
+      if (_selectedAgama.toLowerCase() == 'semua' ||
+          normalizedAgama == _selectedAgama.toLowerCase()) {
         final geometry = feature['geometry'];
         if (geometry == null) continue;
 
@@ -86,13 +164,10 @@ class _MapPageState extends State<MapPage> {
         _filteredMarkers.add(
           Marker(
             point: LatLng(lat, lon),
-            child: IconButton(
-              icon: Icon(
-                Icons.location_on,
-                color: _getMarkerColor(agamaFromJson),
-                size: 40,
-              ),
-              onPressed: () {
+            width: 20, // Menggunakan ukuran yang Anda catat
+            height: 20, // Menggunakan ukuran yang Anda catat
+            child: GestureDetector(
+              onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(name),
@@ -101,29 +176,64 @@ class _MapPageState extends State<MapPage> {
                   ),
                 );
               },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _getMarkerColor(normalizedAgama),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text(
+                    _getMarkerEmoji(normalizedAgama),
+                    style: const TextStyle(fontSize: 24.0),
+                  ),
+                ),
+              ),
             ),
           ),
         );
       }
     }
-    setState(() {});
   }
 
-  // --- PERUBAHAN 2: Menyesuaikan warna marker dengan nilai baru ---
-  Color _getMarkerColor(String agama) {
-    switch (agama.toLowerCase()) {
+  String _getMarkerEmoji(String agama) {
+    switch (agama) {
       case 'muslim':
-        return Colors.green;
+        return '🕌';
       case 'christian':
-        return Colors.blue;
+        return '⛪';
       case 'hindu':
-        return Colors.orange;
+        return '🛕';
       case 'buddhist':
-        return Colors.amber;
+        return '☸️';
       case 'jewish':
-        return Colors.deepPurple;
+        return '✡️';
       default:
-        return Colors.red;
+        return '📍';
+    }
+  }
+
+  Color _getMarkerColor(String agama) {
+    switch (agama) {
+      case 'muslim':
+        return Colors.green.shade400;
+      case 'christian':
+        return Colors.blue.shade400;
+      case 'hindu':
+        return Colors.orange.shade400;
+      case 'buddhist':
+        return Colors.amber.shade400;
+      case 'jewish':
+        return Colors.deepPurple.shade300;
+      default:
+        return Colors.red.shade400;
     }
   }
 
@@ -134,15 +244,20 @@ class _MapPageState extends State<MapPage> {
         title: const Text('Peta Tempat Ibadah DIY'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _centerOnMyLocation,
+        child: const Icon(Icons.my_location),
+      ),
       body:
           _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Stack(
                 children: [
                   FlutterMap(
+                    mapController: _mapController,
                     options: MapOptions(
                       initialCenter: LatLng(-7.7956, 110.3695),
-                      initialZoom: 13.0,
+                      initialZoom: 15.0,
                     ),
                     children: [
                       TileLayer(
@@ -150,7 +265,23 @@ class _MapPageState extends State<MapPage> {
                             'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         subdomains: const ['a', 'b', 'c'],
                       ),
-                      MarkerLayer(markers: _filteredMarkers),
+                      MarkerLayer(
+                        markers: [
+                          ..._filteredMarkers,
+                          if (_currentLocation != null)
+                            Marker(
+                              point: LatLng(
+                                _currentLocation!.latitude!,
+                                _currentLocation!.longitude!,
+                              ),
+                              child: Icon(
+                                Icons.person_pin_circle,
+                                color: Colors.blue.shade600,
+                                size: 40,
+                              ),
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                   Positioned(
@@ -165,7 +296,6 @@ class _MapPageState extends State<MapPage> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         children:
                             _agamaOptions.map((agama) {
-                              // Menggunakan nilai dari _agamaOptions untuk UI
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 4.0,
@@ -177,8 +307,8 @@ class _MapPageState extends State<MapPage> {
                                     if (isSelected) {
                                       setState(() {
                                         _selectedAgama = agama;
+                                        _applyFilter();
                                       });
-                                      _applyFilter();
                                     }
                                   },
                                   selectedColor: Theme.of(context).primaryColor,

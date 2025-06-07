@@ -228,40 +228,45 @@ class _GamePageState extends State<GamePage> {
         }
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              const SizedBox(height: 10),
-              GameBoard(
-                guesses: _gameState.guesses,
-                currentGuess: _currentGuess,
-                currentAttempt: _gameState.attempts,
-                correctWord: _gameState.currentWord!.kata,
-              ),
-              if (_gameState.status == GameStatus.won ||
-                  _gameState.status == GameStatus.lost)
-                _buildGameEndDialog(),
-              const Spacer(),
-              if (_gameState.status == GameStatus.playing)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 16.0),
-                  child: Text(
-                    'MADE BY ADE7',
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.white54,
-                      fontSize: 14,
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(height: 10),
+                GameBoard(
+                  guesses: _gameState.guesses,
+                  currentGuess: _currentGuess,
+                  currentAttempt: _gameState.attempts,
+                  correctWord: _gameState.currentWord!.kata,
+                ),
+                if (_gameState.status == GameStatus.won ||
+                    _gameState.status == GameStatus.lost)
+                  _buildGameEndDialog(),
+
+                // --- PERUBAHAN DI SINI ---
+                // Tampilkan Keyboard & teks hanya saat status game 'playing'
+                if (_gameState.status == GameStatus.playing) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32.0),
+                    child: Text(
+                      'MADE BY ADE7',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.white54,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-              Keyboard(
-                keyStatus: _gameState.keyboardStatus,
-                onLetterPressed: _onLetterPressed,
-                onEnterPressed: _onEnterPressed,
-                onBackspacePressed: _onBackspacePressed,
-              ),
-              const SizedBox(height: 20),
-            ],
+                  Keyboard(
+                    keyStatus: _gameState.keyboardStatus,
+                    onLetterPressed: _onLetterPressed,
+                    onEnterPressed: _onEnterPressed,
+                    onBackspacePressed: _onBackspacePressed,
+                  ),
+                ],
+
+                const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
     }
