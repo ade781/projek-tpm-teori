@@ -5,6 +5,7 @@ import 'package:projek_akhir_teori/pages/game_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 import 'package:projek_akhir_teori/pages/map_page.dart';
 import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
+import 'package:projek_akhir_teori/pages/world_clock_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,6 +109,18 @@ class _HomePageState extends State<HomePage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const CurrencyConverterPage(),
+                    ),
+                  );
+                },
+              ),
+              _MenuCard(
+                icon: Icons.access_time_filled,
+                title: 'Jam Dunia',
+                subtitle: 'Lihat waktu di berbagai belahan dunia',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const WorldClockPage(),
                     ),
                   );
                 },

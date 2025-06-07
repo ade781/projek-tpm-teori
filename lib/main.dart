@@ -6,9 +6,12 @@ import 'app.dart';
 import 'services/auth_service.dart';
 import 'services/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones(); 
+
 
   await dotenv.load(fileName: ".env");
 
