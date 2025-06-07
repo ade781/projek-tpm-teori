@@ -2,89 +2,172 @@
 
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';
-import 'package:projek_akhir_teori/pages/login_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 import 'package:projek_akhir_teori/pages/map_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
+  State<HomePage> createState() => _HomePageState();
+}
 
-    void logout() async {
-      await authService.logout();
-      // Navigasi ke LoginPage dan hapus semua rute sebelumnya.
-      // Ini mencegah pengguna menekan tombol kembali untuk masuk ke HomePage setelah logout.
-      if (context.mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (Route<dynamic> route) => false, // Predikat ini menghapus semua rute.
-        );
-      }
+class _HomePageState extends State<HomePage> {
+  final AuthService _authService = AuthService();
+  String? _username;
+
+  @override
+  void initState() {
+    super.initState();
+    // Panggil fungsi untuk memuat data pengguna saat halaman pertama kali dibuka
+    _loadUserData();
+  }
+
+  // --- FITUR BARU: Memuat Nama Pengguna ---
+  // Fungsi async untuk mengambil nama pengguna dari AuthService.
+  Future<void> _loadUserData() async {
+    final user = await _authService.getLoggedInUserObject();
+    // Periksa 'mounted' untuk memastikan widget masih ada di tree sebelum setState.
+    if (mounted && user != null) {
+      setState(() {
+        _username = user.username;
+      });
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          // Tombol Logout di AppBar
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: logout,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.tertiary,
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
+        ),
+        // --- PERUBAHAN 4: Layout Utama ---
+        // Menggunakan SafeArea dan ListView untuk tata letak yang aman dan bisa di-scroll.
+        child: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
+            children: <Widget>[
+              // --- Header dengan Nama Pengguna ---
+              Text(
+                'Selamat Datang,',
+                style: TextStyle(
+                  fontSize: 22,
+                  color: Colors.white.withOpacity(0.9),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _username ??
+                    'Pengguna', // Tampilkan nama pengguna, atau 'Pengguna' jika belum dimuat
+                style: const TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 40),
+
+              // --- Kartu Menu ---
+              _MenuCard(
+                icon: Icons.gamepad_outlined,
+                title: 'Lurufa (Tebak Kata)',
+                subtitle: 'Uji kosakatamu di sini',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const GamePage()),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              _MenuCard(
+                icon: Icons.map_outlined,
+                title: 'Peta Ibadah',
+                subtitle: 'Cari lokasi tempat ibadah terdekat',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const MapPage()),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Selamat Datang!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 40),
-            // Tombol Menu "Tebak Kata"
-            ElevatedButton.icon(
-              icon: const Icon(Icons.gamepad_outlined),
-              label: const Text('Tebak Kata'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
-                ),
-                textStyle: const TextStyle(fontSize: 18),
+    );
+  }
+}
+
+// --- WIDGET BARU: _MenuCard ---
+// Widget kustom untuk menampilkan kartu menu yang lebih menarik.
+class _MenuCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MenuCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 8,
+      shadowColor: Colors.black.withOpacity(0.3),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              onPressed: () {
-                // Navigasi ke halaman permainan
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const GamePage()),
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.map_outlined),
-              label: const Text('Info Tempat Ibadah'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal, // Contoh warna berbeda
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 15,
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
-                textStyle: const TextStyle(fontSize: 18),
               ),
-              onPressed: () {
-                // Navigasi ke halaman peta
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const MapPage()),
-                );
-              },
-            ),
-          ],
+              const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
