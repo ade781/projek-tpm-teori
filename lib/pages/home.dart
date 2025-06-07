@@ -9,7 +9,9 @@ import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
 import 'package:projek_akhir_teori/pages/world_clock_page.dart';
 import 'package:projek_akhir_teori/services/aqi_service.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart'; // <-- PASTIKAN IMPORT INI ADA
+import 'package:lottie/lottie.dart';
+import 'package:projek_akhir_teori/pages/sensor_page.dart';
+import 'package:projek_akhir_teori/pages/kompas_page.dart'; // Import halaman kompas yang baru
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,7 +34,6 @@ class _HomePageState extends State<HomePage> {
 
   void _loadInitialData() {
     _loadUserData();
-    // Memuat data AQI saat halaman pertama kali dibuka
     _aqiFuture = _aqiService.getAqiForCurrentLocation();
   }
 
@@ -50,7 +51,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
-          // Fungsi untuk memuat ulang data saat pengguna menarik layar
           setState(() {
             _aqiFuture = _aqiService.getAqiForCurrentLocation();
           });
@@ -86,7 +86,7 @@ class _HomePageState extends State<HomePage> {
 
   SliverToBoxAdapter _buildHeader() {
     final String formattedDate = DateFormat(
-      'EEEE, d MMMM yyyy',
+      'EEEE, d MMMM', // Format tanggal disesuaikan
       'id_ID',
     ).format(DateTime.now());
     return SliverToBoxAdapter(
@@ -100,7 +100,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget untuk menampilkan kartu kualitas udara
   SliverToBoxAdapter _buildAqiCard() {
     return SliverToBoxAdapter(
       child: Padding(
@@ -109,7 +108,6 @@ class _HomePageState extends State<HomePage> {
           future: _aqiFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // ## KODE BARU DI SINI ##
               return SizedBox(
                 height: 250,
                 child: Center(
@@ -205,6 +203,19 @@ class _HomePageState extends State<HomePage> {
         'subtitle': 'Lihat waktu di berbagai negara',
         'page': const WorldClockPage(),
       },
+      {
+        'icon': Icons.sensors,
+        'title': 'Data Sensor',
+        'subtitle':
+            'Baca data dari accelerometer, gyroscope, magnetometer, dan proximity',
+        'page': const SensorPage(),
+      },
+      {
+        'icon': Icons.explore, // Icon untuk kompas
+        'title': 'Kompas',
+        'subtitle': 'Temukan arah mata angin',
+        'page': const KompasPage(), // Halaman kompas baru
+      },
     ];
 
     return SliverList(
@@ -255,7 +266,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// Widget terpisah untuk Kartu Info AQI agar lebih rapi
 class _AqiInfoCard extends StatelessWidget {
   final AqiData aqiData;
   const _AqiInfoCard({required this.aqiData});

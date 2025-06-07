@@ -23,7 +23,11 @@ class TimeService {
     TimezoneInfo(location: 'Asia/Jakarta', displayName: 'WIB', flag: '🇮🇩'),
     TimezoneInfo(location: 'Asia/Makassar', displayName: 'WITA', flag: '🇮🇩'),
     TimezoneInfo(location: 'Asia/Jayapura', displayName: 'WIT', flag: '🇮🇩'),
-    TimezoneInfo(location: 'Europe/London', displayName: 'London', flag: '🇬🇧'),
+    TimezoneInfo(
+      location: 'Europe/London',
+      displayName: 'London',
+      flag: '🇬🇧',
+    ),
     // --- PERBAIKAN FINAL ---
     // Mengganti 'Etc/Greenwich' dengan 'GMT' yang merupakan identifier standar
     TimezoneInfo(location: 'GMT', displayName: 'UTC / Greenwich', flag: '🌐'),

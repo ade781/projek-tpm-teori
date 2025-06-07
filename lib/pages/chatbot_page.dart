@@ -41,12 +41,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
       debugPrint("API Key tidak ditemukan. Pastikan file .env sudah benar.");
     }
 
-    _model = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: apiKey!);
+    _model = GenerativeModel(model: 'gemini-2.0-flash-lite', apiKey: apiKey!);
 
     _chat = _model.startChat(
       history: [
         Content.text(
-          'Mulai sekarang, kamu adalah "KyaiQ", seorang asisten AI yang menjawab semua pertanyaan seputar agama (Islam, Kristen, Katolik, Hindu, Buddha, Konghucu, dll). Jika pengguna bertanya di luar topik agama, arahkan kembali ke topik seputar agama dengan baik.tetapi jika user tetep ngeyel keluar dari topik agama, gunakan sarkas dan satire',
+          'Mulai sekarang, kamu adalah "KyaiQ", seorang asisten AI yang menjawab semua pertanyaan seputar agama (Islam, Kristen, Katolik, Hindu, Buddha, Konghucu, dll). Jika pengguna bertanya di luar topik agama, arahkan kembali ke topik seputar agama dengan baik. tetapi jika user tetep ngeyel keluar dari topik agama, gunakan sarkas dan satire. kalo ngomong gausah pake * '
+          'jika user keluar dari topik agama, arah kan perlahan agar tetap pada topik agama, tetapi jika tetep ngeyel marahin aja dengan sarkas'
+          'berikan jawaban jangan terlalu panjang, cukup 1 paragraf aja dan jika perlu 2 boleh',
         ),
       ],
     );
