@@ -1,11 +1,14 @@
 // lib/pages/home.dart
 
 import 'package:flutter/material.dart';
+import 'package:projek_akhir_teori/models/aqi_model.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 import 'package:projek_akhir_teori/pages/map_page.dart';
 import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
 import 'package:projek_akhir_teori/pages/world_clock_page.dart';
+import 'package:projek_akhir_teori/services/aqi_service.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,20 +19,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final AuthService _authService = AuthService();
+  final AqiService _aqiService = AqiService();
   String? _username;
+  late Future<AqiData?> _aqiFuture;
 
   @override
   void initState() {
     super.initState();
-    // Panggil fungsi untuk memuat data pengguna saat halaman pertama kali dibuka
-    _loadUserData();
+    _loadInitialData();
   }
 
-  // --- FITUR BARU: Memuat Nama Pengguna ---
-  // Fungsi async untuk mengambil nama pengguna dari AuthService.
+  void _loadInitialData() {
+    _loadUserData();
+    // Memuat data AQI saat halaman pertama kali dibuka
+    _aqiFuture = _aqiService.getAqiForCurrentLocation();
+  }
+
   Future<void> _loadUserData() async {
     final user = await _authService.getLoggedInUserObject();
-    // Periksa 'mounted' untuk memastikan widget masih ada di tree sebelum setState.
     if (mounted && user != null) {
       setState(() {
         _username = user.username;
@@ -40,156 +47,298 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).colorScheme.primary,
-              Theme.of(context).colorScheme.tertiary,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          // Fungsi untuk memuat ulang data saat pengguna menarik layar
+          setState(() {
+            _aqiFuture = _aqiService.getAqiForCurrentLocation();
+          });
+        },
+        child: CustomScrollView(
+          slivers: [
+            _buildSliverAppBar(),
+            _buildHeader(),
+            _buildAqiCard(),
+            _buildOtherFeaturesTitle(),
+            // --- PERBAIKAN DI SINI ---
+            // Mengganti grid dengan list untuk mengatasi overflow
+            _buildFeaturesList(),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          ],
         ),
-        // --- PERUBAHAN 4: Layout Utama ---
-        // Menggunakan SafeArea dan ListView untuk tata letak yang aman dan bisa di-scroll.
-        child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 24.0,
-              vertical: 16.0,
-            ),
-            children: <Widget>[
-              Text(
-                'Selamat Datang,',
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.white.withOpacity(0.9),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _username ??
-                    'Pengguna', // Tampilkan nama pengguna, atau 'Pengguna' jika belum dimuat
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 40),
+      ),
+    );
+  }
 
-              _MenuCard(
-                icon: Icons.gamepad_outlined,
-                title: 'Lurufa (Tebak Kata)',
-                subtitle: 'Uji kosakatamu di sini',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const GamePage()),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              _MenuCard(
-                icon: Icons.map_outlined,
-                title: 'Peta Ibadah',
-                subtitle: 'Cari lokasi tempat ibadah terdekat',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const MapPage()),
-                  );
-                },
-              ),
-              _MenuCard(
-                icon: Icons.currency_exchange,
-                title: 'Konversi Mata Uang',
-                subtitle: 'Cek nilai tukar Rupiah, Rial, Dollar, Euro',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const CurrencyConverterPage(),
-                    ),
-                  );
-                },
-              ),
-              _MenuCard(
-                icon: Icons.access_time_filled,
-                title: 'Jam Dunia',
-                subtitle: 'Lihat waktu di berbagai belahan dunia',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const WorldClockPage(),
-                    ),
-                  );
-                },
-              ),
-            ],
+  SliverAppBar _buildSliverAppBar() {
+    return SliverAppBar(
+      floating: true,
+      pinned: true,
+      snap: false,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      elevation: 0,
+      title: Text(
+        'Selamat Datang, ${_username ?? 'Pengguna'}!',
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+      ),
+      centerTitle: false,
+    );
+  }
+
+  SliverToBoxAdapter _buildHeader() {
+    final String formattedDate = DateFormat(
+      'EEEE, d MMMM yyyy',
+      'id_ID',
+    ).format(DateTime.now());
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        child: Text(
+          formattedDate,
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+        ),
+      ),
+    );
+  }
+
+  // Widget untuk menampilkan kartu kualitas udara
+  SliverToBoxAdapter _buildAqiCard() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: FutureBuilder<AqiData?>(
+          future: _aqiFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 150,
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            if (snapshot.hasError) {
+              return _buildErrorCard(snapshot.error.toString());
+            }
+            if (!snapshot.hasData) {
+              return _buildErrorCard(
+                "Tidak ada data kualitas udara ditemukan.",
+              );
+            }
+
+            final aqiData = snapshot.data!;
+            return _AqiInfoCard(aqiData: aqiData);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard(String error) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        height: 150,
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 40),
+            const SizedBox(height: 8),
+            const Text(
+              "Gagal Memuat Data",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              error,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  SliverToBoxAdapter _buildOtherFeaturesTitle() {
+    return const SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 32, 16, 16),
+        child: Text(
+          'Fitur Lainnya',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+
+  // --- PERBAIKAN: Menggunakan SliverList ---
+  SliverList _buildFeaturesList() {
+    final features = [
+      {
+        'icon': Icons.gamepad_outlined,
+        'title': 'Lurufa',
+        'subtitle': 'Uji kosakatamu di sini',
+        'page': const GamePage(),
+      },
+      {
+        'icon': Icons.map_outlined,
+        'title': 'Peta Ibadah',
+        'subtitle': 'Cari lokasi tempat ibadah',
+        'page': const MapPage(),
+      },
+      {
+        'icon': Icons.currency_exchange,
+        'title': 'Konverter',
+        'subtitle': 'Cek nilai tukar mata uang',
+        'page': const CurrencyConverterPage(),
+      },
+      {
+        'icon': Icons.access_time_filled,
+        'title': 'Jam Dunia',
+        'subtitle': 'Lihat waktu di berbagai negara',
+        'page': const WorldClockPage(),
+      },
+    ];
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final feature = features[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+          child: _buildFeatureListItem(
+            feature['icon'] as IconData,
+            feature['title'] as String,
+            feature['subtitle'] as String,
+            feature['page'] as Widget,
           ),
+        );
+      }, childCount: features.length),
+    );
+  }
+
+  // --- WIDGET BARU: untuk setiap item dalam list ---
+  Widget _buildFeatureListItem(
+    IconData icon,
+    String title,
+    String subtitle,
+    Widget page,
+  ) {
+    return Card(
+      elevation: 2,
+      shadowColor: Colors.black.withAlpha(25),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: ListTile(
+        onTap:
+            () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (context) => page)),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 20,
+        ),
+        leading: Icon(icon, size: 40, color: Theme.of(context).primaryColor),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: Colors.grey,
         ),
       ),
     );
   }
 }
 
-class _MenuCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
+// Widget terpisah untuk Kartu Info AQI agar lebih rapi
+class _AqiInfoCard extends StatelessWidget {
+  final AqiData aqiData;
+  const _AqiInfoCard({required this.aqiData});
 
-  const _MenuCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
+  Color _getAqiColor(int aqi) {
+    if (aqi <= 50) return Colors.green;
+    if (aqi <= 100) return Colors.yellow;
+    if (aqi <= 150) return Colors.orange;
+    if (aqi <= 200) return Colors.red;
+    if (aqi <= 300) return Colors.purple;
+    return Colors.brown;
+  }
+
+  String _getAqiStatus(int aqi) {
+    if (aqi <= 50) return "Baik";
+    if (aqi <= 100) return "Sedang";
+    if (aqi <= 150) return "Tidak Sehat bagi Kelompok Sensitif";
+    if (aqi <= 200) return "Tidak Sehat";
+    if (aqi <= 300) return "Sangat Tidak Sehat";
+    return "Berbahaya";
+  }
 
   @override
   Widget build(BuildContext context) {
+    final aqiColor = _getAqiColor(aqiData.aqi);
+    final aqiStatus = _getAqiStatus(aqiData.aqi);
+
     return Card(
-      elevation: 8,
-      shadowColor: Colors.black.withOpacity(0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 40,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-            ],
+      elevation: 4,
+      shadowColor: aqiColor.withAlpha(77),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [aqiColor.withAlpha(179), aqiColor],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    aqiData.cityName.split(',').first,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    aqiStatus,
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(230),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              children: [
+                Text(
+                  aqiData.aqi.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  "AQI",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
