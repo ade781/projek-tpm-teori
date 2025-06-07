@@ -56,8 +56,9 @@ class _GamePageState extends State<GamePage> {
       }
       _startNewRound();
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         setState(() => _gameState = GameState(status: GameStatus.error));
+      }
     }
   }
 
@@ -100,8 +101,9 @@ class _GamePageState extends State<GamePage> {
 
   void _onEnterPressed() {
     if (_gameState.status != GameStatus.playing ||
-        _gameState.currentWord == null)
+        _gameState.currentWord == null) {
       return;
+    }
     if (_currentGuess.length != _wordLength) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

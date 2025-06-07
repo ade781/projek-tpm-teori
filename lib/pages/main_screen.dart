@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/pages/home.dart';
 import 'package:projek_akhir_teori/pages/profile_page.dart';
 import 'package:projek_akhir_teori/widgets/bottom_navbar.dart';
+import 'package:projek_akhir_teori/pages/chatbot_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,8 +15,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  // Daftar halaman yang akan ditampilkan sesuai dengan tab navbar
-  static const List<Widget> _pages = <Widget>[HomePage(), ProfilePage()];
+  static const List<Widget> _pages = <Widget>[
+    HomePage(),
+    ChatbotPage(),
+    ProfilePage(),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -27,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages.elementAt(_selectedIndex),
+      // Pemanggilan ini akan secara otomatis menggunakan widget BottomNavbar yang sudah kita perbarui
       bottomNavigationBar: BottomNavbar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
