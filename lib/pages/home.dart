@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 import 'package:projek_akhir_teori/pages/map_page.dart';
+import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -58,7 +59,6 @@ class _HomePageState extends State<HomePage> {
               vertical: 16.0,
             ),
             children: <Widget>[
-              // --- Header dengan Nama Pengguna ---
               Text(
                 'Selamat Datang,',
                 style: TextStyle(
@@ -79,7 +79,6 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 40),
 
-              // --- Kartu Menu ---
               _MenuCard(
                 icon: Icons.gamepad_outlined,
                 title: 'Lurufa (Tebak Kata)',
@@ -101,6 +100,18 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
+              _MenuCard(
+                icon: Icons.currency_exchange,
+                title: 'Konversi Mata Uang',
+                subtitle: 'Cek nilai tukar Rupiah, Rial, Dollar, Euro',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const CurrencyConverterPage(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -109,8 +120,6 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-// --- WIDGET BARU: _MenuCard ---
-// Widget kustom untuk menampilkan kartu menu yang lebih menarik.
 class _MenuCard extends StatelessWidget {
   final IconData icon;
   final String title;
