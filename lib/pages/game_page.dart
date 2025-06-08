@@ -9,8 +9,8 @@ import '../models/letter_status.dart';
 import '../widgets/game_board.dart';
 import '../widgets/keyboard.dart';
 import '../services/notification_service.dart';
-import '../services/stats_service.dart'; // <-- IMPORT BARU
-import 'stats_page.dart'; // <-- IMPORT BARU
+import '../services/stats_service.dart'; 
+import 'stats_page.dart'; 
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -21,7 +21,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   final WordService _wordService = WordService();
-  final StatsService _statsService = StatsService(); // <-- INSTANSIASI SERVICE
+  final StatsService _statsService = StatsService(); 
   GameState _gameState = GameState(status: GameStatus.loading);
   List<WordModel> _allWords = [];
   String _currentGuess = '';
@@ -34,7 +34,7 @@ class _GamePageState extends State<GamePage> {
     _initializeGame();
   }
 
-  // ... (initState, dispose, _initializeGame, _startNewRound tidak berubah) ...
+
 
   @override
   void dispose() {

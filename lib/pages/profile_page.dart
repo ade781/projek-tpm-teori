@@ -43,9 +43,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
     if (pickedFile == null) return;
 
-    // Panggil service untuk update path di database
     await _authService.updateUserImagePath(pickedFile.path);
-
 
     await _loadUserData();
   }
@@ -63,23 +61,14 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profil'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Logout',
-            onPressed: _logout,
-          ),
-        ],
+      body: SafeArea(
+        child:
+            _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _currentUser == null
+                ? const Center(child: Text('Gagal memuat data pengguna.'))
+                : _buildProfileView(),
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : _currentUser == null
-              ? const Center(child: Text('Gagal memuat data pengguna.'))
-              : _buildProfileView(),
     );
   }
 
@@ -87,42 +76,96 @@ class _ProfilePageState extends State<ProfilePage> {
     final user = _currentUser!;
     final hasImage = user.imagePath != null && user.imagePath!.isNotEmpty;
 
-    return Center(
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
             alignment: Alignment.bottomRight,
             children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey.shade300,
-                backgroundImage:
-                    hasImage ? FileImage(File(user.imagePath!)) : null,
-                child:
-                    !hasImage
-                        ? const Icon(Icons.person, size: 80, color: Colors.grey)
-                        : null,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.1),
+                  backgroundImage:
+                      hasImage ? FileImage(File(user.imagePath!)) : null,
+                  child:
+                      !hasImage
+                          ? Icon(
+                            Icons.person,
+                            size: 80,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
+                          : null,
+                ),
               ),
-              // Tombol untuk mengubah gambar
-              Material(
-                color: Theme.of(context).colorScheme.primary,
-                borderRadius: BorderRadius.circular(30),
-                child: InkWell(
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
                   onTap: _pickAndSaveImage,
-                  borderRadius: BorderRadius.circular(30),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Icon(Icons.edit, color: Colors.white, size: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
           Text(
             user.username,
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+              letterSpacing: 0.5,
+            ),
+          ),
+
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _logout,
+              icon: const Icon(Icons.logout),
+              label: const Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ),
         ],
       ),

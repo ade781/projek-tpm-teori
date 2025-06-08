@@ -106,84 +106,141 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Definisikan skema warna agar mudah diubah
-    final Color primaryColor = Theme.of(context).colorScheme.primary;
-    final Color secondaryColor =
-        Theme.of(context).colorScheme.secondaryContainer;
-    final Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'KyaiQ',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.w700, // Cukup tebal untuk menonjol
+            fontSize: 24,
+            color: const Color.fromARGB(
+              255,
+              255,
+              255,
+              255,
+            ), // Warna biru-abu gelap yang modern
+            letterSpacing: 0.8,
+            shadows: [
+              Shadow(
+                blurRadius: 2.0, // Blur yang sangat minim
+                color: Colors.black.withOpacity(0.2), // Bayangan transparan
+                offset: Offset(1.0, 1.0), // Offset kecil
+              ),
+            ],
+          ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: primaryColor,
         centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return _buildMessageBubble(
-                  message,
-                  primaryColor: primaryColor,
-                  secondaryColor: secondaryColor,
-                );
-              },
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors:
+                  isDarkMode
+                      ? [
+                        const Color.fromARGB(255, 199, 110, 94),
+                        const Color.fromARGB(255, 216, 97, 136),
+                      ]
+                      : [
+                        const Color.fromARGB(255, 209, 84, 199),
+                        const Color.fromARGB(255, 223, 73, 173),
+                      ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient:
+              isDarkMode
+                  ? LinearGradient(
+                    colors: [Colors.grey.shade900, Colors.grey.shade800],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  )
+                  : LinearGradient(
+                    colors: [Colors.grey.shade50, Colors.grey.shade100],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8,
+                ),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4.0),
+                    child: _buildMessageBubble(message, isDarkMode: isDarkMode),
+                  );
+                },
+              ),
             ),
-          _buildChatInput(primaryColor: primaryColor),
-        ],
+            if (_isLoading)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      isDarkMode ? Colors.teal.shade300 : Colors.teal,
+                    ),
+                  ),
+                ),
+              ),
+            _buildChatInput(isDarkMode: isDarkMode),
+          ],
+        ),
       ),
     );
   }
 
-  // Menggunakan BubbleSpecialThree dari package chat_bubbles
-  Widget _buildMessageBubble(
-    ChatMessage message, {
-    required Color primaryColor,
-    required Color secondaryColor,
-  }) {
+  Widget _buildMessageBubble(ChatMessage message, {required bool isDarkMode}) {
     final bool isUser = message.isFromUser;
     return BubbleSpecialThree(
       text: message.text,
-      color: isUser ? primaryColor : secondaryColor,
+      color:
+          isUser
+              ? isDarkMode
+                  ? Colors.teal.shade700
+                  : Colors.teal.shade600
+              : isDarkMode
+              ? Colors.grey.shade800
+              : Colors.grey.shade200,
       tail: true,
       isSender: isUser,
       textStyle: TextStyle(
         color:
             isUser
                 ? Colors.white
-                : Theme.of(context).colorScheme.onSecondaryContainer,
+                : isDarkMode
+                ? Colors.white
+                : Colors.black87,
         fontSize: 16,
       ),
     );
   }
 
-  Widget _buildChatInput({required Color primaryColor}) {
+  Widget _buildChatInput({required bool isDarkMode}) {
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: isDarkMode ? Colors.grey.shade900 : Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            spreadRadius: 1,
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
         ],
       ),
@@ -191,39 +248,55 @@ class _ChatbotPageState extends State<ChatbotPage> {
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _controller,
-                enabled: !_isLoading,
-                decoration: InputDecoration(
-                  hintText: 'Kirim pesan...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 14,
-                  ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color:
+                      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                onSubmitted: (_) => _sendMessage(),
+                child: TextField(
+                  controller: _controller,
+                  enabled: !_isLoading,
+                  decoration: InputDecoration(
+                    hintText: 'Tulis pesan...',
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 16,
+                    ),
+                    hintStyle: TextStyle(
+                      color:
+                          isDarkMode
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade600,
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black87,
+                  ),
+                  onSubmitted: (_) => _sendMessage(),
+                ),
               ),
             ),
             const SizedBox(width: 8),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: 48,
-              height: 48,
-              child: IconButton.filled(
-                icon: const Icon(Icons.send_rounded),
-                onPressed: _sendMessage,
-                style: IconButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.teal.withOpacity(0.3),
+                    blurRadius: 6,
+                    spreadRadius: 2,
                   ),
+                ],
+              ),
+              child: CircleAvatar(
+                backgroundColor:
+                    isDarkMode ? Colors.teal.shade600 : Colors.teal,
+                child: IconButton(
+                  icon: const Icon(Icons.send_rounded),
+                  color: Colors.white,
+                  onPressed: _sendMessage,
                 ),
               ),
             ),
