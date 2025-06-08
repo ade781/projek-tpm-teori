@@ -1,3 +1,4 @@
+import 'dart:async'; // Import untuk StreamSubscription
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:proximity_sensor/proximity_sensor.dart';
@@ -22,8 +23,14 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
   double _magnetometerY = 0.0;
   double _magnetometerZ = 0.0;
 
+  bool _isNear = false; // State untuk proximity sensor
+
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // Variabel untuk menampung StreamSubscription
+  final List<StreamSubscription<dynamic>> _streamSubscriptions =
+      <StreamSubscription<dynamic>>[];
 
   @override
   void initState() {
@@ -38,63 +45,68 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    accelerometerEventStream().listen((AccelerometerEvent event) {
-      if (mounted) {
-        setState(() {
-          _accelerometerX = event.x;
-          _accelerometerY = event.y;
-          _accelerometerZ = event.z;
-        });
-      }
-    });
+    // Menambahkan semua listener ke dalam list untuk manajemen yang mudah
+    _streamSubscriptions.add(
+      accelerometerEventStream().listen((AccelerometerEvent event) {
+        if (mounted) {
+          setState(() {
+            _accelerometerX = event.x;
+            _accelerometerY = event.y;
+            _accelerometerZ = event.z;
+          });
+        }
+      }),
+    );
 
-    gyroscopeEventStream().listen((GyroscopeEvent event) {
-      if (mounted) {
-        setState(() {
-          _gyroscopeX = event.x;
-          _gyroscopeY = event.y;
-          _gyroscopeZ = event.z;
-        });
-      }
-    });
+    _streamSubscriptions.add(
+      gyroscopeEventStream().listen((GyroscopeEvent event) {
+        if (mounted) {
+          setState(() {
+            _gyroscopeX = event.x;
+            _gyroscopeY = event.y;
+            _gyroscopeZ = event.z;
+          });
+        }
+      }),
+    );
 
-    magnetometerEventStream().listen((MagnetometerEvent event) {
-      if (mounted) {
-        setState(() {
-          _magnetometerX = event.x;
-          _magnetometerY = event.y;
-          _magnetometerZ = event.z;
-        });
-      }
-    });
+    _streamSubscriptions.add(
+      magnetometerEventStream().listen((MagnetometerEvent event) {
+        if (mounted) {
+          setState(() {
+            _magnetometerX = event.x;
+            _magnetometerY = event.y;
+            _magnetometerZ = event.z;
+          });
+        }
+      }),
+    );
 
-    _listenProximitySensor();
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _listenProximitySensor() async {
-    try {
+    _streamSubscriptions.add(
       ProximitySensor.events.listen(
         (int event) {
           if (mounted) {
-            setState(() {});
+            setState(() {
+              // event > 0 berarti objek dekat, event == 0 berarti jauh
+              _isNear = (event > 0) ? true : false;
+            });
           }
         },
         onError: (error) {
           debugPrint('Error sensor jarak: $error');
         },
-        onDone: () {
-          debugPrint('Aliran sensor jarak selesai.');
-        },
-      );
-    } catch (e) {
-      debugPrint('Gagal mengakses sensor jarak: $e');
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    // Membatalkan semua subscription saat widget dihancurkan
+    for (final subscription in _streamSubscriptions) {
+      subscription.cancel();
     }
+    super.dispose();
   }
 
   @override
@@ -166,6 +178,10 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 24),
 
+                _buildProximityCard(context), // Kartu baru untuk Proximity
+
+                const SizedBox(height: 20),
+
                 _buildSensorCard(
                   context,
                   'Akselerometer',
@@ -215,6 +231,92 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // WIDGET BARU UNTUK PROXIMITY SENSOR
+  Widget _buildProximityCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+
+    return Card(
+      elevation: 6,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: theme.colorScheme.secondary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      shadowColor: Colors.black.withOpacity(0.2),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [
+              isDarkMode
+                  ? Colors.grey.shade900.withOpacity(0.7)
+                  : Colors.white.withOpacity(0.9),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Icon(
+                Icons.sensor_occupied_outlined,
+                color: theme.colorScheme.secondary,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Sensor Jarak',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.secondary,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: (_isNear
+                          ? Colors.orange.shade700
+                          : Colors.green.shade600)
+                      .withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: (_isNear
+                            ? Colors.orange.shade700
+                            : Colors.green.shade600)
+                        .withOpacity(0.4),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  _isNear ? 'Dekat' : 'Jauh',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        _isNear
+                            ? Colors.orange.shade300
+                            : Colors.green.shade300,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

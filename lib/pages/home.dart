@@ -74,14 +74,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100, // Fallback color
+      backgroundColor: Colors.grey.shade100, 
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
-              "assets/background_home.png",
-            ), // Menggunakan gambar dari assets
-            fit: BoxFit.cover, // Memastikan gambar menutupi seluruh layar
+              "assets/Background_home.png", 
+            ),
+            fit: BoxFit.cover,
           ),
         ),
         child: RefreshIndicator(
@@ -126,6 +126,7 @@ class _HomePageState extends State<HomePage> {
                 color: Theme.of(context).colorScheme.primary,
                 shadows: [
                   Shadow(
+                    // ignore: deprecated_member_use
                     color: Colors.white.withOpacity(0.5),
                     blurRadius: 2,
                     offset: const Offset(1, 1),
@@ -174,8 +175,10 @@ class _HomePageState extends State<HomePage> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
+                  // ignore: deprecated_member_use
                   color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(16),
+                  // ignore: deprecated_member_use
                   border: Border.all(color: Colors.deepPurple.withOpacity(0.1)),
                 ),
                 child: Row(
@@ -216,10 +219,20 @@ class _HomePageState extends State<HomePage> {
           future: _aqiFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
+              return SizedBox(
                 height: 200,
-                alignment: Alignment.center,
-                child: Lottie.asset('assets/aqi_loading.json', height: 300),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      top: -50,
+                      child: Lottie.asset(
+                        'assets/aqi_loading.json',
+                        height: 300,
+                      ),
+                    ),
+                  ],
+                ),
               );
             }
             if (snapshot.hasError ||
@@ -250,6 +263,7 @@ class _HomePageState extends State<HomePage> {
       height: 120,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: color.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -262,6 +276,7 @@ class _HomePageState extends State<HomePage> {
             text,
             textAlign: TextAlign.center,
             style: TextStyle(
+              // ignore: deprecated_member_use
               color: iconColor.withOpacity(0.9),
               fontWeight: FontWeight.w500,
             ),
@@ -357,7 +372,7 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
         child: Text(
-          'MADE BY ADE&',
+          'MADE BY ADE7',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
@@ -402,12 +417,14 @@ class _AqiInfoCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
+          // ignore: deprecated_member_use
           colors: [aqiColor.withOpacity(0.7), aqiColor],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: aqiColor.withOpacity(0.3),
             blurRadius: 10,
             spreadRadius: 2,
@@ -425,6 +442,7 @@ class _AqiInfoCard extends StatelessWidget {
                 Text(
                   'Kualitas Udara Saat Ini',
                   style: TextStyle(
+                    // ignore: deprecated_member_use
                     color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
                   ),
