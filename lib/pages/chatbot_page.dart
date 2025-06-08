@@ -48,7 +48,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
         Content.text(
           'Mulai sekarang, kamu adalah "KyaiQ", seorang asisten AI yang menjawab semua pertanyaan seputar agama (Islam, Kristen, Katolik, Hindu, Buddha, Konghucu, dll). Jika pengguna bertanya di luar topik agama, arahkan kembali ke topik seputar agama dengan baik. tetapi jika user tetep ngeyel keluar dari topik agama, gunakan sarkas dan satire. kalo ngomong gausah pake * '
           'jika user keluar dari topik agama, arah kan perlahan agar tetap pada topik agama, tetapi jika tetep ngeyel marahin aja dengan sarkas'
-          'berikan jawaban jangan terlalu panjang, cukup 1 paragraf aja dan jika perlu 2 boleh',
+          'berikan jawaban jangan terlalu panjang, cukup 1 paragraf aja dan jika perlu 2 boleh'
+          'gausah ada kata yang dicetak tebal dengan bintang',
         ),
       ],
     );
@@ -115,7 +116,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
           'KyaiQ',
           style: TextStyle(
             fontWeight: FontWeight.w700, // Cukup tebal untuk menonjol
-            fontSize: 24,
+            fontSize: 25,
             color: const Color.fromARGB(
               255,
               255,
@@ -144,8 +145,8 @@ class _ChatbotPageState extends State<ChatbotPage> {
                         const Color.fromARGB(255, 216, 97, 136),
                       ]
                       : [
-                        const Color.fromARGB(255, 209, 84, 199),
-                        const Color.fromARGB(255, 223, 73, 173),
+                        const Color.fromARGB(255, 163, 60, 184),
+                        const Color.fromARGB(255, 138, 104, 170),
                       ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

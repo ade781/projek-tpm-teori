@@ -11,7 +11,7 @@ import 'package:projek_akhir_teori/services/aqi_service.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:projek_akhir_teori/pages/sensor_page.dart';
-import 'package:projek_akhir_teori/pages/kompas_page.dart'; // Import halaman kompas yang baru
+import 'package:projek_akhir_teori/pages/kompas_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -49,6 +49,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: () async {
           setState(() {
@@ -57,7 +58,6 @@ class _HomePageState extends State<HomePage> {
         },
         child: CustomScrollView(
           slivers: [
-            _buildSliverAppBar(),
             _buildHeader(),
             _buildAqiCard(),
             _buildOtherFeaturesTitle(),
@@ -69,32 +69,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  SliverAppBar _buildSliverAppBar() {
-    return SliverAppBar(
-      floating: true,
-      pinned: true,
-      snap: false,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      elevation: 0,
-      title: Text(
-        'Selamat Datang, ${_username ?? 'Pengguna'}!',
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-      centerTitle: false,
-    );
-  }
-
   SliverToBoxAdapter _buildHeader() {
     final String formattedDate = DateFormat(
-      'EEEE, d MMMM', // Format tanggal disesuaikan
+      'EEEE, d MMMM',
       'id_ID',
     ).format(DateTime.now());
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-        child: Text(
-          formattedDate,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+        padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Halo, ${_username ?? 'Pengguna'}!',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6A1B9A),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              formattedDate,
+              style: TextStyle(color: Colors.deepPurple.shade300, fontSize: 16),
+            ),
+          ],
         ),
       ),
     );
@@ -103,7 +102,7 @@ class _HomePageState extends State<HomePage> {
   SliverToBoxAdapter _buildAqiCard() {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: FutureBuilder<AqiData?>(
           future: _aqiFuture,
           builder: (context, snapshot) {
@@ -138,25 +137,37 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildErrorCard(String error) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: Colors.deepPurple.shade100, width: 1),
+      ),
+      color: Colors.deepPurple.shade50,
       child: Container(
         height: 150,
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 40),
+            Icon(
+              Icons.error_outline,
+              color: Colors.deepPurple.shade400,
+              size: 40,
+            ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               "Gagal Memuat Data",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.deepPurple.shade800,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),
             Text(
               error,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              style: TextStyle(color: Colors.deepPurple.shade600, fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],
@@ -166,12 +177,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   SliverToBoxAdapter _buildOtherFeaturesTitle() {
-    return const SliverToBoxAdapter(
+    return SliverToBoxAdapter(
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16, 32, 16, 16),
+        padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
         child: Text(
           'Fitur Lainnya',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple.shade800,
+          ),
         ),
       ),
     );
@@ -181,7 +196,7 @@ class _HomePageState extends State<HomePage> {
     final features = [
       {
         'icon': Icons.gamepad_outlined,
-        'title': 'Lurufa',
+        'title': 'Tebak kata',
         'subtitle': 'Uji kosakatamu di sini',
         'page': const GamePage(),
       },
@@ -206,15 +221,14 @@ class _HomePageState extends State<HomePage> {
       {
         'icon': Icons.sensors,
         'title': 'Data Sensor',
-        'subtitle':
-            'Baca data dari accelerometer, gyroscope, magnetometer, dan proximity',
+        'subtitle': 'Baca data dari accelerometer, gyroscope, magnetometer',
         'page': const SensorPage(),
       },
       {
-        'icon': Icons.explore, // Icon untuk kompas
+        'icon': Icons.explore,
         'title': 'Kompas',
         'subtitle': 'Temukan arah mata angin',
-        'page': const KompasPage(), // Halaman kompas baru
+        'page': const KompasPage(),
       },
     ];
 
@@ -222,7 +236,7 @@ class _HomePageState extends State<HomePage> {
       delegate: SliverChildBuilderDelegate((context, index) {
         final feature = features[index];
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
           child: _buildFeatureListItem(
             feature['icon'] as IconData,
             feature['title'] as String,
@@ -241,25 +255,61 @@ class _HomePageState extends State<HomePage> {
     Widget page,
   ) {
     return Card(
-      elevation: 2,
-      shadowColor: Colors.black.withAlpha(25),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ListTile(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.deepPurple.shade100, width: 1),
+      ),
+      color: Colors.white,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
         onTap:
             () => Navigator.of(
               context,
             ).push(MaterialPageRoute(builder: (context) => page)),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 20,
-        ),
-        leading: Icon(icon, size: 40, color: Theme.of(context).primaryColor),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text(subtitle, style: TextStyle(color: Colors.grey.shade600)),
-        trailing: const Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: Colors.grey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.deepPurple.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, size: 24, color: Colors.deepPurple.shade800),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.deepPurple.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.deepPurple.shade600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.deepPurple.shade400,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -295,7 +345,7 @@ class _AqiInfoCard extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      shadowColor: aqiColor.withAlpha(77),
+      shadowColor: Colors.deepPurple.withAlpha(50),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         padding: const EdgeInsets.all(20),

@@ -9,8 +9,8 @@ import '../models/letter_status.dart';
 import '../widgets/game_board.dart';
 import '../widgets/keyboard.dart';
 import '../services/notification_service.dart';
-import '../services/stats_service.dart'; 
-import 'stats_page.dart'; 
+import '../services/stats_service.dart';
+import 'stats_page.dart';
 
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -21,7 +21,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   final WordService _wordService = WordService();
-  final StatsService _statsService = StatsService(); 
+  final StatsService _statsService = StatsService();
   GameState _gameState = GameState(status: GameStatus.loading);
   List<WordModel> _allWords = [];
   String _currentGuess = '';
@@ -33,8 +33,6 @@ class _GamePageState extends State<GamePage> {
     super.initState();
     _initializeGame();
   }
-
-
 
   @override
   void dispose() {
@@ -104,7 +102,6 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
-  // --- MODIFIKASI DI SINI ---
   void _onEnterPressed() {
     if (_gameState.status != GameStatus.playing ||
         _gameState.currentWord == null) {
@@ -138,7 +135,6 @@ class _GamePageState extends State<GamePage> {
       isWin = false;
     }
 
-    // Jika permainan berakhir (menang atau kalah), simpan hasilnya
     if (newStatus == GameStatus.won || newStatus == GameStatus.lost) {
       _statsService.saveGame(
         _gameState.currentWord!.kata.toUpperCase(),
@@ -156,8 +152,6 @@ class _GamePageState extends State<GamePage> {
       _currentGuess = '';
     });
   }
-
-  // ... (_updateKeyboardStatus tidak berubah) ...
 
   Map<String, LetterStatus> _updateKeyboardStatus(String guess) {
     final newStatus = Map<String, LetterStatus>.from(_gameState.keyboardStatus);
@@ -186,15 +180,24 @@ class _GamePageState extends State<GamePage> {
       data: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF121213),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
+          seedColor: Colors.deepPurple, // Changed to purple
           brightness: Brightness.dark,
         ),
       ),
       child: Scaffold(
         appBar: AppBar(
-          // ... (title tidak berubah)
+          title: const Text(
+            'Tebak Kata', // Added "Tebak Kata" title
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              letterSpacing: 1.2,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           actions: [
-            // --- TAMBAHKAN TOMBOL STATISTIK ---
             IconButton(
               icon: const Icon(Icons.bar_chart),
               onPressed: () {
@@ -204,11 +207,6 @@ class _GamePageState extends State<GamePage> {
               },
               tooltip: 'Lihat Statistik',
             ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _startNewRound,
-              tooltip: 'Mulai Ulang',
-            ),
           ],
         ),
         body: _buildGameContent(),
@@ -216,19 +214,32 @@ class _GamePageState extends State<GamePage> {
     );
   }
 
-  // ... (_buildGameContent, _buildGameEndDialog tidak berubah)
   Widget _buildGameContent() {
     switch (_gameState.status) {
       case GameStatus.loading:
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Colors.deepPurple, // Changed to purple
+          ),
+        );
       case GameStatus.error:
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Gagal memuat kata.', style: TextStyle(fontSize: 16)),
+              const Text(
+                'Gagal memuat kata.',
+                style: TextStyle(fontSize: 16, color: Colors.white70),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepPurple, // Changed to purple
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
                 onPressed: _initializeGame,
                 child: const Text('Coba Lagi'),
               ),
@@ -240,7 +251,10 @@ class _GamePageState extends State<GamePage> {
       case GameStatus.lost:
         if (_gameState.currentWord == null) {
           return const Center(
-            child: Text('Terjadi kesalahan: Kata tidak tersedia.'),
+            child: Text(
+              'Terjadi kesalahan: Kata tidak tersedia.',
+              style: TextStyle(color: Colors.white70),
+            ),
           );
         }
         return Padding(
@@ -277,7 +291,6 @@ class _GamePageState extends State<GamePage> {
                     onBackspacePressed: _onBackspacePressed,
                   ),
                 ],
-
                 const SizedBox(height: 20),
               ],
             ),
@@ -310,12 +323,15 @@ class _GamePageState extends State<GamePage> {
           const SizedBox(height: 16),
           Text.rich(
             TextSpan(
-              style: const TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18, color: Colors.white),
               children: [
                 const TextSpan(text: 'Kata yang benar: '),
                 TextSpan(
                   text: correctWord,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurpleAccent, // Changed to purple
+                  ),
                 ),
               ],
             ),
@@ -333,6 +349,7 @@ class _GamePageState extends State<GamePage> {
           const SizedBox(height: 24),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple, // Changed to purple
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
             onPressed: _startNewRound,
