@@ -1,5 +1,3 @@
-// lib/pages/game_page.dart
-
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../models/word_model.dart';
@@ -180,14 +178,14 @@ class _GamePageState extends State<GamePage> {
       data: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF121213),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple, // Changed to purple
+          seedColor: Colors.deepPurple,
           brightness: Brightness.dark,
         ),
       ),
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Tebak Kata', // Added "Tebak Kata" title
+            'Tebak Kata',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 24,
@@ -218,9 +216,7 @@ class _GamePageState extends State<GamePage> {
     switch (_gameState.status) {
       case GameStatus.loading:
         return const Center(
-          child: CircularProgressIndicator(
-            color: Colors.deepPurple, // Changed to purple
-          ),
+          child: CircularProgressIndicator(color: Colors.deepPurple),
         );
       case GameStatus.error:
         return Center(
@@ -234,7 +230,7 @@ class _GamePageState extends State<GamePage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple, // Changed to purple
+                  backgroundColor: Colors.deepPurple,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
@@ -330,7 +326,7 @@ class _GamePageState extends State<GamePage> {
                   text: correctWord,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.deepPurpleAccent, // Changed to purple
+                    color: Colors.deepPurpleAccent,
                   ),
                 ),
               ],
@@ -349,7 +345,7 @@ class _GamePageState extends State<GamePage> {
           const SizedBox(height: 24),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple, // Changed to purple
+              backgroundColor: Colors.deepPurple,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
             ),
             onPressed: _startNewRound,

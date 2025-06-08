@@ -1,5 +1,3 @@
-// lib/pages/currency_converter_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/services/currency_service.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +15,14 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
   final _currencyService = CurrencyService();
 
   final List<String> _currencies = [
-    'IDR', 'SAR', 'USD', 'EUR', 'JPY', 'GBP', 'AUD', 'SGD'
+    'IDR',
+    'SAR',
+    'USD',
+    'EUR',
+    'JPY',
+    'GBP',
+    'AUD',
+    'SGD',
   ];
   String _baseCurrency = 'IDR';
 
@@ -35,7 +40,8 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
     if (amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Masukkan jumlah yang valid untuk dikonversi.')),
+          content: Text('Masukkan jumlah yang valid untuk dikonversi.'),
+        ),
       );
       return;
     }
@@ -44,18 +50,20 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
     setState(() {
       _isLoading = true;
       _convertedAmounts = {};
-      _lastUpdated = null; // Reset waktu update
+      _lastUpdated = null;
     });
 
     try {
-      // Menerima seluruh response dari service
       final responseData = await _currencyService.getLatestRates(_baseCurrency);
       final rates = responseData['conversion_rates'] as Map<String, dynamic>;
       final lastUpdateUtc = responseData['time_last_update_utc'] as String;
 
-      // Parsing dan format waktu update
-      final parsedDate = DateFormat("E, d MMM yyyy HH:mm:ss Z").parse(lastUpdateUtc, true);
-      final formattedDate = DateFormat('d MMM yyyy, HH:mm').format(parsedDate.toLocal());
+      final parsedDate = DateFormat(
+        "E, d MMM yyyy HH:mm:ss Z",
+      ).parse(lastUpdateUtc, true);
+      final formattedDate = DateFormat(
+        'd MMM yyyy, HH:mm',
+      ).format(parsedDate.toLocal());
 
       final newConvertedAmounts = <String, double>{};
       for (var currency in _currencies) {
@@ -68,7 +76,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
 
       setState(() {
         _convertedAmounts = newConvertedAmounts;
-        _lastUpdated = formattedDate; // Simpan waktu update yang sudah diformat
+        _lastUpdated = formattedDate;
         _animations = List.generate(
           _convertedAmounts.length,
           (index) => Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -85,9 +93,9 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
       });
       _animationController.forward(from: 0.0);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -151,7 +159,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
                         _buildConvertButton(),
                         const SizedBox(height: 30),
                         _buildResultsSection(),
-                        // Menampilkan footer info dan credit
+
                         if (_lastUpdated != null) _buildFooterInfo(),
                       ],
                     ),
@@ -165,7 +173,6 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
     );
   }
 
-  /// AppBar kustom
   Widget _buildAppBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -179,14 +186,16 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
           const Text(
             'Konverter Global',
             style: TextStyle(
-                color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// Widget untuk kartu input
   Widget _buildInputCard() {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -206,8 +215,9 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
           Expanded(
             child: TextField(
               controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -229,13 +239,16 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: _baseCurrency,
-                items: _currencies.map((String currency) {
-                  return DropdownMenuItem<String>(
-                    value: currency,
-                    child: Text(currency,
-                        style: const TextStyle(fontWeight: FontWeight.w500)),
-                  );
-                }).toList(),
+                items:
+                    _currencies.map((String currency) {
+                      return DropdownMenuItem<String>(
+                        value: currency,
+                        child: Text(
+                          currency,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      );
+                    }).toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setState(() => _baseCurrency = val);
@@ -249,41 +262,43 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
     );
   }
 
-  /// Tombol Konversi
   Widget _buildConvertButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: _isLoading ? null : _convert,
-        icon: _isLoading
-            ? Container()
-            : const Icon(Icons.currency_exchange, size: 20),
-        label: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child:
-                    CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
-              )
-            : const Text(
-                'Konversi Sekarang',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+        icon:
+            _isLoading
+                ? Container()
+                : const Icon(Icons.currency_exchange, size: 20),
+        label:
+            _isLoading
+                ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.white,
+                  ),
+                )
+                : const Text(
+                  'Konversi Sekarang',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.secondary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 5,
-          shadowColor:
-              Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+          shadowColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
         ),
       ),
     );
   }
 
-  /// Bagian untuk menampilkan hasil
   Widget _buildResultsSection() {
     if (_convertedAmounts.isEmpty && !_isLoading) {
       return Center(
@@ -303,7 +318,7 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
         ),
       );
     }
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -332,7 +347,10 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
                   begin: const Offset(0, 0.5),
                   end: Offset.zero,
                 ).animate(_animations[index]),
-                child: _buildResultItem(currency: entry.key, amount: entry.value),
+                child: _buildResultItem(
+                  currency: entry.key,
+                  amount: entry.value,
+                ),
               ),
             );
           },
@@ -341,15 +359,31 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
     );
   }
 
-  /// Widget untuk setiap item hasil
   Widget _buildResultItem({required String currency, required double amount}) {
-    final numberFormat =
-        NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: 2);
+    final numberFormat = NumberFormat.currency(
+      locale: 'en_US',
+      symbol: '',
+      decimalDigits: 2,
+    );
     final currencyFullName = {
-      'IDR': 'Rupiah Indonesia', 'SAR': 'Rial Arab Saudi', 'USD': 'Dolar Amerika', 'EUR': 'Euro', 'JPY': 'Yen Jepang', 'GBP': 'Pound Inggris', 'AUD': 'Dolar Australia', 'SGD': 'Dolar Singapura'
+      'IDR': 'Rupiah Indonesia',
+      'SAR': 'Rial Arab Saudi',
+      'USD': 'Dolar Amerika',
+      'EUR': 'Euro',
+      'JPY': 'Yen Jepang',
+      'GBP': 'Pound Inggris',
+      'AUD': 'Dolar Australia',
+      'SGD': 'Dolar Singapura',
     };
     final currencyFlags = {
-      'IDR': '🇮🇩', 'SAR': '🇸🇦', 'USD': '🇺🇸', 'EUR': '🇪🇺', 'JPY': '🇯🇵', 'GBP': '🇬🇧', 'AUD': '🇦🇺', 'SGD': '🇸🇬'
+      'IDR': '🇮🇩',
+      'SAR': '🇸🇦',
+      'USD': '🇺🇸',
+      'EUR': '🇪🇺',
+      'JPY': '🇯🇵',
+      'GBP': '🇬🇧',
+      'AUD': '🇦🇺',
+      'SGD': '🇸🇬',
     };
 
     return Card(
@@ -361,7 +395,10 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
           children: [
-            Text(currencyFlags[currency] ?? '🏳️', style: const TextStyle(fontSize: 28)),
+            Text(
+              currencyFlags[currency] ?? '🏳️',
+              style: const TextStyle(fontSize: 28),
+            ),
             const SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -369,7 +406,9 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
                 Text(
                   currency,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 Text(
                   currencyFullName[currency] ?? '',
@@ -380,20 +419,18 @@ class _CurrencyConverterPageState extends State<CurrencyConverterPage>
             const Spacer(),
             Text(
               numberFormat.format(amount),
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
       ),
     );
   }
-  
-  /// Widget untuk menampilkan footer info dan credit
+
   Widget _buildFooterInfo() {
     return Padding(
       padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
-      child: Center( // Dibungkus dengan widget Center
+      child: Center(
         child: Column(
           children: [
             Text(

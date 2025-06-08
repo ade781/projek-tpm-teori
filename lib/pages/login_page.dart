@@ -24,7 +24,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    // Setup animations
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
@@ -123,7 +122,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo with scale animation only
                   ScaleTransition(
                     scale: _scaleAnimation,
                     child: Column(
@@ -171,7 +169,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 40),
 
-                  // Input Fields with slide animation only
                   SlideTransition(
                     position: Tween<Offset>(
                       begin: const Offset(0, 0.5),

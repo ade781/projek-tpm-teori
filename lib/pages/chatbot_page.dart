@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-// Model untuk sebuah pesan dalam chat
+
 class ChatMessage {
   final String text;
   final bool isFromUser;
@@ -115,7 +115,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         title: Text(
           'KyaiQ',
           style: TextStyle(
-            fontWeight: FontWeight.w700, // Cukup tebal untuk menonjol
+            fontWeight: FontWeight.w700, 
             fontSize: 25,
             color: const Color.fromARGB(
               255,
@@ -126,9 +126,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
             letterSpacing: 0.8,
             shadows: [
               Shadow(
-                blurRadius: 2.0, // Blur yang sangat minim
-                color: Colors.black.withOpacity(0.2), // Bayangan transparan
-                offset: Offset(1.0, 1.0), // Offset kecil
+                blurRadius: 2.0, 
+                color: Colors.black.withOpacity(0.2), 
+                offset: Offset(1.0, 1.0), 
               ),
             ],
           ),

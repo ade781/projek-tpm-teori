@@ -1,10 +1,8 @@
-// lib/models/game_history.dart
-
 import 'package:hive/hive.dart';
 
 part 'game_history.g.dart';
 
-@HiveType(typeId: 1) // Gunakan typeId yang belum terpakai (User adalah 0)
+@HiveType(typeId: 1)
 class GameHistory extends HiveObject {
   @HiveField(0)
   final String username;

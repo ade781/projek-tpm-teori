@@ -1,7 +1,3 @@
-// lib/pages/sensor_page.dart
-
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:proximity_sensor/proximity_sensor.dart';
@@ -14,7 +10,6 @@ class SensorPage extends StatefulWidget {
 }
 
 class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
-  // Variabel data sensor
   double _accelerometerX = 0.0;
   double _accelerometerY = 0.0;
   double _accelerometerZ = 0.0;
@@ -27,7 +22,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
   double _magnetometerY = 0.0;
   double _magnetometerZ = 0.0;
 
-  // Kontrol animasi
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
@@ -35,7 +29,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    // Inisialisasi animasi
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -45,7 +38,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
-    // Mendengarkan aliran data sensor
     accelerometerEventStream().listen((AccelerometerEvent event) {
       if (mounted) {
         setState(() {
@@ -147,7 +139,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header dengan ikon animasi
                 ScaleTransition(
                   scale: _pulseAnimation,
                   child: Center(
@@ -175,7 +166,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 24),
 
-                // Kartu sensor
                 _buildSensorCard(
                   context,
                   'Akselerometer',
@@ -207,7 +197,6 @@ class _SensorPageState extends State<SensorPage> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 30),
 
-                // Footer
                 Center(
                   child: Column(
                     children: [

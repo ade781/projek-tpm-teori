@@ -1,5 +1,3 @@
-// lib/widgets/bottom_navbar.dart
-
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
@@ -16,13 +14,7 @@ class BottomNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // --- PERUBAHAN DI SINI ---
-      // Dekorasi diubah untuk membuat latar belakang sepenuhnya transparan.
-      decoration: BoxDecoration(
-    
-        color: Colors.transparent,
-
-     ),
+      decoration: BoxDecoration(color: Colors.transparent),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),

@@ -1,13 +1,12 @@
-// lib/pages/profile_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:projek_akhir_teori/models/user_model.dart';
 import 'package:projek_akhir_teori/pages/login_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
-import 'package:projek_akhir_teori/services/stats_service.dart'; // Import StatsService
-import 'package:projek_akhir_teori/models/game_history.dart'; // Import GameHistory
-import 'package:intl/intl.dart'; // Import intl untuk formatting tanggal
+import 'package:projek_akhir_teori/services/stats_service.dart';
+import 'package:projek_akhir_teori/models/game_history.dart';
+import 'package:intl/intl.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -43,7 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (user != null) {
           _gameHistoryFuture = _statsService.getGameHistoryForUser(
             user.username,
-          ); // 'username' adalah String.
+          );
         }
       });
     }
@@ -52,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _pickAndSaveImage() async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      imageQuality: 50, // Kurangi kualitas gambar untuk performa
+      imageQuality: 50,
     );
     if (pickedFile == null) return;
 
@@ -187,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildFeedbackCard(context),
                 const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Riwayat Permainan'),
-                _buildGameHistoryList(), // Ini akan memanggil fungsi yang dimodifikasi
+                _buildGameHistoryList(),
                 const SizedBox(height: 40),
                 _buildLogoutButton(context),
               ],
@@ -219,7 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 12),
             _buildInfoRow(context, 'Username', user.username, Icons.person),
             const SizedBox(height: 8),
-            // Dropdown untuk menampilkan hash password
+
             InkWell(
               onTap: () {
                 setState(() {
@@ -263,12 +262,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  // Menampilkan hash password dari user object
                   user.password,
                   style: TextStyle(
                     fontSize: 14,
-                    fontFamily:
-                        'monospace', // Font monospace agar terlihat seperti hash
+                    fontFamily: 'monospace',
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -432,19 +429,15 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         } else {
           final history = snapshot.data!;
-          // [PERUBAHAN] Ambil maksimal 3 item terakhir
-          final recentHistory =
-              history
-                  .take(3)
-                  .toList(); // Ambil 3 teratas karena sudah di-reversed di service
+
+          final recentHistory = history.take(3).toList();
 
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount:
-                recentHistory.length, // Gunakan .length dari recentHistory
+            itemCount: recentHistory.length,
             itemBuilder: (context, index) {
-              final game = recentHistory[index]; // Gunakan recentHistory
+              final game = recentHistory[index];
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 elevation: 2,

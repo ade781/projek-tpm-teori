@@ -94,7 +94,6 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
               Image.asset('assets/logo_utama.png', height: 100, width: 100),
               const SizedBox(height: 20),
               Text(
@@ -108,7 +107,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 30),
 
-              // Form Input
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -213,7 +211,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 30),
 
-              // Register Button
               ElevatedButton(
                 onPressed: _register,
                 style: ElevatedButton.styleFrom(
@@ -236,7 +233,6 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 20),
 
-              // Login Link
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: RichText(

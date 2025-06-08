@@ -1,5 +1,3 @@
-// lib/pages/home.dart
-
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/models/aqi_model.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';

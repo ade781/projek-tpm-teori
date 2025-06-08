@@ -1,5 +1,3 @@
-// lib/pages/map_page.dart
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -16,7 +14,6 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // State untuk peta dan data
   bool _isLoading = true;
   List<Map<String, dynamic>> _allFeatures = [];
   final List<Marker> _filteredMarkers = [];
@@ -31,12 +28,10 @@ class _MapPageState extends State<MapPage> {
     'Lainnya',
   ];
 
-  // State untuk fitur lokasi
   final MapController _mapController = MapController();
   LocationData? _currentLocation;
   StreamSubscription<LocationData>? _locationSubscription;
 
-  // --- PENAMBAHAN UNTUK PENCARIAN ---
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -44,22 +39,22 @@ class _MapPageState extends State<MapPage> {
   void initState() {
     super.initState();
     _loadDataAndLocation();
-    // Tambahkan listener untuk text field pencarian
+
     _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
     _locationSubscription?.cancel();
-    _searchController.removeListener(_onSearchChanged); // Hapus listener
-    _searchController.dispose(); // Buang controller
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
     super.dispose();
   }
 
   void _onSearchChanged() {
     setState(() {
       _searchQuery = _searchController.text;
-      _applyFilter(); // Terapkan filter setiap kali teks berubah
+      _applyFilter();
     });
   }
 
@@ -94,8 +89,6 @@ class _MapPageState extends State<MapPage> {
       if (permissionGranted != PermissionStatus.granted) return;
     }
 
-    // --- PERBAIKAN: MINTA AKURASI TINGGI ---
-    // Baris ini meminta perangkat untuk memprioritaskan GPS untuk akurasi terbaik.
     await location.changeSettings(accuracy: LocationAccuracy.high);
 
     final locationData = await location.getLocation();
@@ -103,7 +96,7 @@ class _MapPageState extends State<MapPage> {
       setState(() {
         _currentLocation = locationData;
       });
-      // Setelah lokasi pertama didapat, langsung pusatkan peta ke sana
+
       _centerOnMyLocation();
     }
 
@@ -171,7 +164,6 @@ class _MapPageState extends State<MapPage> {
         normalizedAgama = 'lainnya';
       }
 
-      // Filter berdasarkan agama DAN query pencarian
       final bool matchesAgama =
           _selectedAgama.toLowerCase() == 'semua' ||
           normalizedAgama == _selectedAgama.toLowerCase();
@@ -180,7 +172,6 @@ class _MapPageState extends State<MapPage> {
       );
 
       if (matchesAgama && matchesSearch) {
-        // Hanya tambahkan jika cocok dengan kedua filter
         final geometry = feature['geometry'];
         if (geometry == null) continue;
 
@@ -271,10 +262,7 @@ class _MapPageState extends State<MapPage> {
         title: const Text('Peta Tempat Ibadah DIY'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         bottom: PreferredSize(
-          // Tambahkan PreferredSize untuk TextField
-          preferredSize: const Size.fromHeight(
-            kToolbarHeight + 10,
-          ), // Beri ruang untuk TextField
+          preferredSize: const Size.fromHeight(kToolbarHeight + 10),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -297,7 +285,6 @@ class _MapPageState extends State<MapPage> {
                           icon: const Icon(Icons.clear),
                           onPressed: () {
                             _searchController.clear();
-                            // _onSearchChanged akan dipanggil otomatis oleh listener
                           },
                         )
                         : null,

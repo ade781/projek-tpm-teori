@@ -1,6 +1,6 @@
 // lib/pages/stats_page.dart
 
-import 'package:collection/collection.dart'; // <-- IMPORT BARU UNTUK MEMPERBAIKI .max
+import 'package:collection/collection.dart'; 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/services/stats_service.dart';
@@ -97,7 +97,6 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildGuessDistributionChart(Map<int, int> distribution) {
-    // Dengan import 'collection', baris ini sekarang valid
     final maxValue =
         (distribution.values.maxOrNull ?? 0) > 0
             ? (distribution.values.max).toDouble()

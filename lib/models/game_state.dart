@@ -22,13 +22,10 @@ class GameState {
     this.keyboardStatus = const {},
   });
 
-  // Jumlah percobaan yang sudah dilakukan adalah panjang dari list `guesses`.
   int get attempts => guesses.length;
 
-  // Sisa percobaan (dari total 6).
   int get remainingAttempts => 6 - attempts;
 
-  // Method untuk membuat salinan GameState dengan beberapa perubahan.
   GameState copyWith({
     WordModel? currentWord,
     List<String>? guesses,
@@ -44,11 +41,4 @@ class GameState {
   }
 }
 
-// Enum untuk status permainan (tidak ada perubahan di sini).
-enum GameStatus {
-  playing, // Permainan sedang berlangsung
-  won, // Pemain memenangkan permainan
-  lost, // Pemain kalah
-  loading, // Sedang memuat data
-  error, // Terjadi kesalahan
-}
+enum GameStatus { playing, won, lost, loading, error }

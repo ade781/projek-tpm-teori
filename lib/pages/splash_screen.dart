@@ -1,5 +1,3 @@
-// lib/pages/splash_screen.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -26,10 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // Memberi jeda agar animasi Lottie sempat terlihat
     await Future.delayed(const Duration(seconds: 2));
 
-    // Periksa koneksi dan navigasi sesuai hasilnya
     _checkConnectivityAndNavigate();
   }
 
@@ -41,7 +37,6 @@ class _SplashScreenState extends State<SplashScreen> {
     if (connectivityResult.contains(ConnectivityResult.none)) {
       _showConnectionDialog();
     } else {
-      // Koneksi berhasil, lanjutkan ke alur aplikasi normal
       final bool isLoggedIn = await _authService.isLoggedIn();
       if (!mounted) return;
 
@@ -57,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void _showConnectionDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // Dialog tidak bisa ditutup
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Koneksi Diperlukan'),
@@ -68,12 +63,9 @@ class _SplashScreenState extends State<SplashScreen> {
             ElevatedButton(
               child: const Text('Coba Lagi'),
               onPressed: () {
-                // ## INI BAGIAN UTAMANYA ##
-                // Navigasi untuk "me-restart" ke SplashScreen
                 Navigator.of(context).pushAndRemoveUntil(
                   MaterialPageRoute(builder: (context) => const SplashScreen()),
-                  (Route<dynamic> route) =>
-                      false, // Hapus semua route sebelumnya
+                  (Route<dynamic> route) => false,
                 );
               },
             ),

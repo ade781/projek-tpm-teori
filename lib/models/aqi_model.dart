@@ -1,5 +1,3 @@
-// lib/models/aqi_model.dart
-
 class AqiData {
   final int aqi;
   final String cityName;
@@ -7,7 +5,6 @@ class AqiData {
   AqiData({required this.aqi, required this.cityName});
 
   factory AqiData.fromJson(Map<String, dynamic> json) {
-    // Melakukan pengecekan untuk memastikan data tidak null
     final aqiValue =
         (json['data']?['aqi'] is int) ? json['data']['aqi'] as int : 0;
 

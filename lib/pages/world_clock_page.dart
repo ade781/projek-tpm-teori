@@ -1,5 +1,3 @@
-// lib/pages/world_clock_page.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/services/time_service.dart';
@@ -18,24 +16,24 @@ class _WorldClockPageState extends State<WorldClockPage> {
   @override
   void initState() {
     super.initState();
-    // Atur timer untuk memperbarui UI setiap detik
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
-        setState(() {}); // Memicu build ulang untuk memperbarui waktu
+        setState(() {});
       }
     });
   }
 
   @override
   void dispose() {
-    _timer.cancel(); // Batalkan timer saat halaman ditutup
+    _timer.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, // Membuat body berada di belakang AppBar
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text(
           'Jam Dunia',
@@ -55,13 +53,11 @@ class _WorldClockPageState extends State<WorldClockPage> {
           ),
         ),
         child: SafeArea(
-          // Menggunakan Column untuk menambahkan footer di bawah list
           child: Column(
             children: [
-              // ListView sekarang dibungkus dengan Expanded agar mengisi ruang yang tersedia
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0), // Padding bawah dihilangkan
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
                   itemCount: _timeService.timezones.length,
                   itemBuilder: (context, index) {
                     final timezoneInfo = _timeService.timezones[index];
@@ -69,7 +65,7 @@ class _WorldClockPageState extends State<WorldClockPage> {
                   },
                 ),
               ),
-              // --- PENAMBAHAN FOOTER DI SINI ---
+
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Text(
@@ -102,7 +98,6 @@ class _WorldClockPageState extends State<WorldClockPage> {
         padding: const EdgeInsets.all(20.0),
         child: Row(
           children: [
-            // Kolom untuk nama kota dan tanggal
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,7 +121,7 @@ class _WorldClockPageState extends State<WorldClockPage> {
                 ],
               ),
             ),
-            // Kolom untuk jam dan offset UTC
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -135,7 +130,7 @@ class _WorldClockPageState extends State<WorldClockPage> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
-                    fontWeight: FontWeight.w200, 
+                    fontWeight: FontWeight.w200,
                   ),
                 ),
                 const SizedBox(height: 4),

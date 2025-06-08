@@ -1,11 +1,10 @@
-// lib/widgets/game_board.dart
 
 import 'package:flutter/material.dart';
 import '../models/letter_status.dart';
 import 'tile.dart';
 
 class GameBoard extends StatelessWidget {
-  // ... (properti tidak berubah) ...
+
   final List<String> guesses;
   final String currentGuess;
   final int currentAttempt;
@@ -28,7 +27,7 @@ class GameBoard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(5, (colIndex) {
-              // ... (logika letter dan status tidak berubah) ...
+        
               final String letter;
               LetterStatus status = LetterStatus.initial;
 
@@ -46,8 +45,7 @@ class GameBoard extends StatelessWidget {
                 letter = '';
               }
 
-              // ## PERUBAHAN DI SINI ##
-              // Bungkus GameTile dengan Expanded agar lebarnya responsif
+             
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -61,7 +59,7 @@ class GameBoard extends StatelessWidget {
     );
   }
 
-  // ... (fungsi _evaluateLetter tidak berubah) ...
+
   LetterStatus _evaluateLetter(String letter, int index, String guessedWord) {
     if (letter.isEmpty) return LetterStatus.initial;
 

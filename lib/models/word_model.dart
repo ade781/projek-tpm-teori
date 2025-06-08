@@ -1,5 +1,3 @@
-// lib/models/word_model.dart
-
 class WordModel {
   final String id;
   final String kata;

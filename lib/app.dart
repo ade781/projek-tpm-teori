@@ -1,10 +1,8 @@
-// lib/app.dart
 import 'package:flutter/material.dart';
-// Hapus import yang tidak perlu
-import 'package:projek_akhir_teori/pages/splash_screen.dart'; // Import splash screen
+
+import 'package:projek_akhir_teori/pages/splash_screen.dart';
 
 class MyApp extends StatelessWidget {
-  // Hapus parameter isLoggedIn karena sudah tidak digunakan
   const MyApp({super.key});
 
   @override
@@ -16,7 +14,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Poppins',
       ),
-      // Jadikan SplashScreen sebagai halaman utama
+
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );

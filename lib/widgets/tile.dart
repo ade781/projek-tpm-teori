@@ -1,5 +1,3 @@
-// lib/widgets/tile.dart
-
 import 'package:flutter/material.dart';
 import '../models/letter_status.dart';
 
@@ -13,7 +11,6 @@ class GameTile extends StatelessWidget {
     this.status = LetterStatus.initial,
   });
 
-  // ... (fungsi _getBackgroundColor dan _getBorder tidak berubah) ...
   Color _getBackgroundColor(BuildContext context) {
     switch (status) {
       case LetterStatus.inWordCorrectLocation:
@@ -36,14 +33,9 @@ class GameTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ## PERUBAHAN DI SINI ##
-    // Container tidak lagi memiliki lebar tetap.
-    // Dibungkus dengan AspectRatio agar tetap kotak (lebar = tinggi).
     return AspectRatio(
       aspectRatio: 1.0,
       child: Container(
-        // width: 65, <-- HAPUS BARIS INI
-        // height: 65, <-- HAPUS BARIS INI
         decoration: BoxDecoration(
           color: _getBackgroundColor(context),
           border: _getBorder(context),

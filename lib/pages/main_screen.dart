@@ -1,4 +1,3 @@
-// lib/pages/main_screen.dart
 import 'package:flutter/material.dart';
 import 'package:projek_akhir_teori/pages/home.dart';
 import 'package:projek_akhir_teori/pages/profile_page.dart';
@@ -31,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _pages.elementAt(_selectedIndex),
-      // Pemanggilan ini akan secara otomatis menggunakan widget BottomNavbar yang sudah kita perbarui
+
       bottomNavigationBar: BottomNavbar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

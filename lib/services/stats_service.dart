@@ -1,11 +1,8 @@
-// lib/services/stats_service.dart
-
 import 'package:collection/collection.dart';
 import 'package:hive/hive.dart';
 import 'package:projek_akhir_teori/models/game_history.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 
-// Class untuk menampung hasil kalkulasi statistik
 class UserStats {
   final int totalGames;
   final int winPercentage;
@@ -50,7 +47,6 @@ class StatsService {
     await _historyBox.add(gameHistory);
   }
 
-  // Mengambil dan mengkalkulasi statistik untuk pengguna saat ini
   Future<UserStats> getCurrentUserStats() async {
     final username = await _authService.getLoggedInUser();
     if (username == null) return UserStats();
@@ -104,13 +100,12 @@ class StatsService {
     );
   }
 
-  // Fungsi baru untuk mengambil riwayat permainan berdasarkan username
   Future<List<GameHistory>> getGameHistoryForUser(String username) async {
     return _historyBox.values
         .where((game) => game.username == username)
         .sortedBy((game) => game.timestamp)
         .toList()
         .reversed
-        .toList(); // Tampilkan yang terbaru di atas
+        .toList();
   }
 }
