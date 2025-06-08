@@ -1,13 +1,16 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart'; // <-- Import Lottie package
 import 'package:projek_akhir_teori/models/aqi_model.dart';
+import 'package:projek_akhir_teori/models/quote_model.dart';
 import 'package:projek_akhir_teori/pages/game_page.dart';
 import 'package:projek_akhir_teori/services/auth_service.dart';
 import 'package:projek_akhir_teori/pages/map_page.dart';
 import 'package:projek_akhir_teori/pages/currency_converter_page.dart';
 import 'package:projek_akhir_teori/pages/world_clock_page.dart';
 import 'package:projek_akhir_teori/services/aqi_service.dart';
+import 'package:projek_akhir_teori/services/quote_service.dart';
 import 'package:intl/intl.dart';
-import 'package:lottie/lottie.dart';
 import 'package:projek_akhir_teori/pages/sensor_page.dart';
 import 'package:projek_akhir_teori/pages/kompas_page.dart';
 
@@ -21,8 +24,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final AuthService _authService = AuthService();
   final AqiService _aqiService = AqiService();
+  final QuoteService _quoteService = QuoteService();
+
   String? _username;
   late Future<AqiData?> _aqiFuture;
+  late Future<QuoteModel> _quoteFuture;
 
   @override
   void initState() {
@@ -33,6 +39,27 @@ class _HomePageState extends State<HomePage> {
   void _loadInitialData() {
     _loadUserData();
     _aqiFuture = _aqiService.getAqiForCurrentLocation();
+    _quoteFuture = _loadRandomQuote();
+  }
+
+  Future<QuoteModel> _loadRandomQuote() async {
+    final quotes = await _quoteService.fetchQuotes();
+    if (quotes.isEmpty) {
+      return QuoteModel(
+        id: '0',
+        isi:
+            'Selamat datang di Lurufa. Tarik ke bawah untuk memuat hikmah baru.',
+      );
+    }
+    final random = Random();
+    return quotes[random.nextInt(quotes.length)];
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      _aqiFuture = _aqiService.getAqiForCurrentLocation();
+      _quoteFuture = _loadRandomQuote();
+    });
   }
 
   Future<void> _loadUserData() async {
@@ -47,49 +74,68 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            _aqiFuture = _aqiService.getAqiForCurrentLocation();
-          });
-        },
-        child: CustomScrollView(
-          slivers: [
-            _buildHeader(),
-            _buildAqiCard(),
-            _buildOtherFeaturesTitle(),
-            _buildFeaturesList(),
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
-          ],
+      backgroundColor: Colors.grey.shade100, // Fallback color
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              "assets/background_home.png",
+            ), // Menggunakan gambar dari assets
+            fit: BoxFit.cover, // Memastikan gambar menutupi seluruh layar
+          ),
+        ),
+        child: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: CustomScrollView(
+            slivers: [
+              _buildHeader(context),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              _buildQuoteCard(),
+              _buildAqiCard(),
+              _buildOtherFeaturesTitle(),
+              _buildFeaturesList(),
+              _buildFooter(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  SliverToBoxAdapter _buildHeader() {
+  SliverAppBar _buildHeader(BuildContext context) {
     final String formattedDate = DateFormat(
-      'EEEE, d MMMM',
+      'EEEE, d MMMM yyyy',
       'id_ID',
     ).format(DateTime.now());
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
-        child: Column(
+    return SliverAppBar(
+      backgroundColor: Colors.transparent,
+      expandedHeight: 120,
+      elevation: 0,
+      pinned: true,
+      flexibleSpace: FlexibleSpaceBar(
+        titlePadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        title: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Halo, ${_username ?? 'Pengguna'}!',
-              style: const TextStyle(
-                fontSize: 28,
+              style: TextStyle(
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF6A1B9A),
+                color: Theme.of(context).colorScheme.primary,
+                shadows: [
+                  Shadow(
+                    color: Colors.white.withOpacity(0.5),
+                    blurRadius: 2,
+                    offset: const Offset(1, 1),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
             Text(
               formattedDate,
-              style: TextStyle(color: Colors.deepPurple.shade300, fontSize: 16),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -97,34 +143,95 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  SliverToBoxAdapter _buildAqiCard() {
+  Widget _buildQuoteCard() {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        child: FutureBuilder<QuoteModel>(
+          future: _quoteFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                !snapshot.hasData) {
+              return Container(
+                height: 80,
+                alignment: Alignment.center,
+                // --- PERUBAHAN LOADING QUOTE ---
+                child: Lottie.asset('assets/quote_loading3.json', height: 80),
+              );
+            }
+            if (snapshot.hasError) {
+              return _buildInfoCard(
+                icon: Icons.error_outline,
+                text: "Gagal memuat hikmah.",
+                color: Colors.red.shade100,
+                iconColor: Colors.red.shade400,
+              );
+            }
+            if (snapshot.hasData) {
+              return Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.deepPurple.withOpacity(0.1)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline,
+                      color: Colors.amber.shade700,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        snapshot.data!.isi,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAqiCard() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
         child: FutureBuilder<AqiData?>(
           future: _aqiFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return SizedBox(
-                height: 250,
-                child: Center(
-                  child: Lottie.asset(
-                    'assets/aqi_loading.json',
-                    width: 250,
-                    height: 250,
-                  ),
-                ),
+              return Container(
+                height: 200,
+                alignment: Alignment.center,
+                child: Lottie.asset('assets/aqi_loading.json', height: 300),
               );
             }
-            if (snapshot.hasError) {
-              return _buildErrorCard(snapshot.error.toString());
-            }
-            if (!snapshot.hasData) {
-              return _buildErrorCard(
-                "Tidak ada data kualitas udara ditemukan.",
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                snapshot.data == null) {
+              return _buildInfoCard(
+                icon: Icons.cloud_off_outlined,
+                text: "Gagal memuat data AQI.",
+                color: Colors.red.shade100,
+                iconColor: Colors.red.shade400,
               );
             }
-
             final aqiData = snapshot.data!;
             return _AqiInfoCard(aqiData: aqiData);
           },
@@ -133,68 +240,58 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildErrorCard(String error) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String text,
+    required Color color,
+    required Color iconColor,
+  }) {
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: Colors.deepPurple.shade100, width: 1),
       ),
-      color: Colors.deepPurple.shade50,
-      child: Container(
-        height: 150,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Colors.deepPurple.shade400,
-              size: 40,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: iconColor, size: 32),
+          const SizedBox(height: 8),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: iconColor.withOpacity(0.9),
+              fontWeight: FontWeight.w500,
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Gagal Memuat Data",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.deepPurple.shade800,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              error,
-              style: TextStyle(color: Colors.deepPurple.shade600, fontSize: 12),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  SliverToBoxAdapter _buildOtherFeaturesTitle() {
+  Widget _buildOtherFeaturesTitle() {
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
         child: Text(
-          'Fitur Lainnya',
+          'Jelajahi Fitur Lainnya',
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.deepPurple.shade800,
+            color: Colors.grey.shade800,
           ),
         ),
       ),
     );
   }
 
-  SliverList _buildFeaturesList() {
+  Widget _buildFeaturesList() {
     final features = [
       {
         'icon': Icons.gamepad_outlined,
-        'title': 'Tebak kata',
+        'title': 'Tebak Kata',
         'subtitle': 'Uji kosakatamu di sini',
         'page': const GamePage(),
       },
@@ -219,7 +316,7 @@ class _HomePageState extends State<HomePage> {
       {
         'icon': Icons.sensors,
         'title': 'Data Sensor',
-        'subtitle': 'Baca data dari accelerometer, gyroscope, magnetometer',
+        'subtitle': 'Baca data dari sensor perangkat',
         'page': const SensorPage(),
       },
       {
@@ -230,83 +327,42 @@ class _HomePageState extends State<HomePage> {
       },
     ];
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final feature = features[index];
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 6.0),
-          child: _buildFeatureListItem(
-            feature['icon'] as IconData,
-            feature['title'] as String,
-            feature['subtitle'] as String,
-            feature['page'] as Widget,
-          ),
-        );
-      }, childCount: features.length),
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          final feature = features[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: _FeatureListItem(
+              icon: feature['icon'] as IconData,
+              title: feature['title'] as String,
+              subtitle: feature['subtitle'] as String,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => feature['page'] as Widget,
+                  ),
+                );
+              },
+            ),
+          );
+        }, childCount: features.length),
+      ),
     );
   }
 
-  Widget _buildFeatureListItem(
-    IconData icon,
-    String title,
-    String subtitle,
-    Widget page,
-  ) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.deepPurple.shade100, width: 1),
-      ),
-      color: Colors.white,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap:
-            () => Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => page)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.deepPurple.shade50,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 24, color: Colors.deepPurple.shade800),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.deepPurple.shade800,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: Colors.deepPurple.shade600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.deepPurple.shade400,
-              ),
-            ],
+  Widget _buildFooter() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 24.0),
+        child: Text(
+          'MADE BY ADE&',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade500,
           ),
         ),
       ),
@@ -330,7 +386,7 @@ class _AqiInfoCard extends StatelessWidget {
   String _getAqiStatus(int aqi) {
     if (aqi <= 50) return "Baik";
     if (aqi <= 100) return "Sedang";
-    if (aqi <= 150) return "Tidak Sehat bagi Kelompok Sensitif";
+    if (aqi <= 150) return "Tidak Sehat (Sensitif)";
     if (aqi <= 200) return "Tidak Sehat";
     if (aqi <= 300) return "Sangat Tidak Sehat";
     return "Berbahaya";
@@ -341,64 +397,168 @@ class _AqiInfoCard extends StatelessWidget {
     final aqiColor = _getAqiColor(aqiData.aqi);
     final aqiStatus = _getAqiStatus(aqiData.aqi);
 
-    return Card(
-      elevation: 4,
-      shadowColor: Colors.deepPurple.withAlpha(50),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          gradient: LinearGradient(
-            colors: [aqiColor.withAlpha(179), aqiColor],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [aqiColor.withOpacity(0.7), aqiColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: aqiColor.withOpacity(0.3),
+            blurRadius: 10,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Kualitas Udara Saat Ini',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  aqiData.cityName.split(',').first,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    aqiStatus,
+                    style: TextStyle(
+                      color: Colors.white.withAlpha(240),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            children: [
+              Text(
+                aqiData.aqi.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 52,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Text(
+                "US AQI",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FeatureListItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _FeatureListItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.08),
+              spreadRadius: 4,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    aqiData.cityName.split(',').first,
+                    title,
                     style: const TextStyle(
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 16,
+                      color: Color(0xFF333333),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    aqiStatus,
-                    style: TextStyle(
-                      color: Colors.white.withAlpha(230),
-                      fontSize: 14,
-                    ),
+                    subtitle,
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
-            Column(
-              children: [
-                Text(
-                  aqiData.aqi.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Text(
-                  "AQI",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey.shade400,
             ),
           ],
         ),

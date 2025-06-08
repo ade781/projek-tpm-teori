@@ -160,7 +160,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Cahaya yang menuntun ke kebenaran',
+                    'Cahaya yang menuntun ke arah kebenaran',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.deepPurple[600],

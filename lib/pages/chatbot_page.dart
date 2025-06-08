@@ -2,7 +2,7 @@ import 'package:chat_bubbles/bubbles/bubble_special_three.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-
+import 'package:lottie/lottie.dart'; // <-- 1. Tambahkan import untuk Lottie
 
 class ChatMessage {
   final String text;
@@ -115,20 +115,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
         title: Text(
           'KyaiQ',
           style: TextStyle(
-            fontWeight: FontWeight.w700, 
+            fontWeight: FontWeight.w700,
             fontSize: 25,
-            color: const Color.fromARGB(
-              255,
-              255,
-              255,
-              255,
-            ), // Warna biru-abu gelap yang modern
+            color: const Color.fromARGB(255, 255, 255, 255),
             letterSpacing: 0.8,
             shadows: [
               Shadow(
-                blurRadius: 2.0, 
-                color: Colors.black.withOpacity(0.2), 
-                offset: Offset(1.0, 1.0), 
+                blurRadius: 2.0,
+                color: Colors.black.withOpacity(0.2),
+                offset: const Offset(1.0, 1.0),
               ),
             ],
           ),
@@ -192,10 +187,11 @@ class _ChatbotPageState extends State<ChatbotPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Center(
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isDarkMode ? Colors.teal.shade300 : Colors.teal,
-                    ),
+                  // Mengganti Row dengan Center
+                  child: Lottie.asset(
+                    'assets/chat_loading.json',
+                    width: 60,
+                    height: 60,
                   ),
                 ),
               ),

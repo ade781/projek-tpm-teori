@@ -332,7 +332,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Mata kuliah Teknologi Pemrograman Mobile (TPM) ini memberikan pengalaman belajar yang sangat berharga. Materi yang diajarkan relevan dengan perkembangan teknologi saat ini, khususnya di bidang pengembangan aplikasi mobile. Dosen yang mengajar sangat kompeten dan mampu menjelaskan konsep-konsep kompleks dengan cara yang mudah dipahami. Praktikum yang diberikan juga menantang dan membantu saya mengaplikasikan teori ke dalam proyek nyata. Saran saya, mungkin bisa ditambahkan studi kasus atau proyek tim yang lebih besar untuk memperdalam pemahaman tentang kolaborasi dalam pengembangan aplikasi. Keseluruhannya, saya sangat puas dengan mata kuliah ini dan merasa siap untuk terjun ke dunia pengembangan aplikasi mobile.',
+              'Mata kuliah Teknologi Pemrograman Mobile (TPM) jadi salah satu pengalaman belajar yang paling memorable dan berkesan selama kuliah. Di sini, saya benar-benar bisa mengimplementasikan ilmu yang sebelumnya dipelajari pada matkul lainnya. Materinya relevan, terutama di pengembangan aplikasi mobile. Memacu untuk break the limit, belajar hal baru, menyelesaikan masalah nyata, dan mengasah skill secara langsung. Debugging dan menyusun aplikasi dari nol jadi poin penting yang bikin mata kuliah ini menyenangkan sekaligus menantang. Secara keseluruhan, TPM memberikan bekal nyata untuk terjun ke dunia pengembangan aplikasi.',
               style: TextStyle(
                 fontSize: 14,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
