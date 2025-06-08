@@ -18,14 +18,11 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final AuthService _authService = AuthService();
-  final StatsService _statsService =
-      StatsService(); 
+  final StatsService _statsService = StatsService();
   User? _currentUser;
   bool _isLoading = true;
-  late Future<List<GameHistory>>
-  _gameHistoryFuture; 
+  late Future<List<GameHistory>> _gameHistoryFuture;
 
- 
   bool _showHashedPassword = false;
 
   @override
@@ -190,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildFeedbackCard(context),
                 const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Riwayat Permainan'),
-                _buildGameHistoryList(),
+                _buildGameHistoryList(), // Ini akan memanggil fungsi yang dimodifikasi
                 const SizedBox(height: 40),
                 _buildLogoutButton(context),
               ],
@@ -200,7 +197,6 @@ class _ProfilePageState extends State<ProfilePage> {
       ],
     );
   }
-
 
   Widget _buildCredentialCard(BuildContext context, User user) {
     return Card(
@@ -378,7 +374,7 @@ class _ProfilePageState extends State<ProfilePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Lurufa: Cahaya yang menuntun ke kebenaran.',
+            'Lurufa: Cahaya yang menuntun ke arah kebenaran.',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -436,12 +432,19 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         } else {
           final history = snapshot.data!;
+          // [PERUBAHAN] Ambil maksimal 3 item terakhir
+          final recentHistory =
+              history
+                  .take(3)
+                  .toList(); // Ambil 3 teratas karena sudah di-reversed di service
+
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: history.length,
+            itemCount:
+                recentHistory.length, // Gunakan .length dari recentHistory
             itemBuilder: (context, index) {
-              final game = history[index];
+              final game = recentHistory[index]; // Gunakan recentHistory
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 elevation: 2,
