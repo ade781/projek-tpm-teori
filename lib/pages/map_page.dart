@@ -1,3 +1,5 @@
+// lib/pages/map_page.dart
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -34,10 +36,40 @@ class _MapPageState extends State<MapPage> {
   LocationData? _currentLocation;
   StreamSubscription<LocationData>? _locationSubscription;
 
+  // --- PENAMBAHAN UNTUK PENCARIAN ---
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
   @override
   void initState() {
     super.initState();
     _loadDataAndLocation();
+    // Tambahkan listener untuk text field pencarian
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _locationSubscription?.cancel();
+    _searchController.removeListener(_onSearchChanged); // Hapus listener
+    _searchController.dispose(); // Buang controller
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text;
+      _applyFilter(); // Terapkan filter setiap kali teks berubah
+    });
+  }
+
+  void _centerOnMyLocation() {
+    if (_currentLocation != null) {
+      _mapController.move(
+        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
+        17.0,
+      );
+    }
   }
 
   Future<void> _loadDataAndLocation() async {
@@ -84,21 +116,6 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
-  @override
-  void dispose() {
-    _locationSubscription?.cancel();
-    super.dispose();
-  }
-
-  void _centerOnMyLocation() {
-    if (_currentLocation != null) {
-      _mapController.move(
-        LatLng(_currentLocation!.latitude!, _currentLocation!.longitude!),
-        17.0,
-      );
-    }
-  }
-
   Future<void> _loadIbadahData() async {
     try {
       final String response = await rootBundle.loadString(
@@ -128,10 +145,13 @@ class _MapPageState extends State<MapPage> {
   void _applyFilter() {
     _filteredMarkers.clear();
 
+    final String lowerCaseSearchQuery = _searchQuery.toLowerCase();
+
     for (var feature in _allFeatures) {
       final properties = feature['properties'];
       if (properties == null) continue;
 
+      final String name = properties['name'] ?? 'Tanpa Nama';
       final String rawAgama =
           (properties['religion'] ?? 'Lainnya').toString().trim().toLowerCase();
 
@@ -151,12 +171,19 @@ class _MapPageState extends State<MapPage> {
         normalizedAgama = 'lainnya';
       }
 
-      if (_selectedAgama.toLowerCase() == 'semua' ||
-          normalizedAgama == _selectedAgama.toLowerCase()) {
+      // Filter berdasarkan agama DAN query pencarian
+      final bool matchesAgama =
+          _selectedAgama.toLowerCase() == 'semua' ||
+          normalizedAgama == _selectedAgama.toLowerCase();
+      final bool matchesSearch = name.toLowerCase().contains(
+        lowerCaseSearchQuery,
+      );
+
+      if (matchesAgama && matchesSearch) {
+        // Hanya tambahkan jika cocok dengan kedua filter
         final geometry = feature['geometry'];
         if (geometry == null) continue;
 
-        final String name = properties['name'] ?? 'Tanpa Nama';
         final List coordinates = geometry['coordinates'];
         final lat = coordinates[1];
         final lon = coordinates[0];
@@ -164,8 +191,8 @@ class _MapPageState extends State<MapPage> {
         _filteredMarkers.add(
           Marker(
             point: LatLng(lat, lon),
-            width: 20, // Menggunakan ukuran yang Anda catat
-            height: 20, // Menggunakan ukuran yang Anda catat
+            width: 40,
+            height: 40,
             child: GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -243,6 +270,41 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: const Text('Peta Tempat Ibadah DIY'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        bottom: PreferredSize(
+          // Tambahkan PreferredSize untuk TextField
+          preferredSize: const Size.fromHeight(
+            kToolbarHeight + 10,
+          ), // Beri ruang untuk TextField
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Cari tempat ibadah...',
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon:
+                    _searchQuery.isNotEmpty
+                        ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                            // _onSearchChanged akan dipanggil otomatis oleh listener
+                          },
+                        )
+                        : null,
+              ),
+            ),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _centerOnMyLocation,
