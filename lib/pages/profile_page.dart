@@ -19,11 +19,14 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final AuthService _authService = AuthService();
   final StatsService _statsService =
-      StatsService(); // Inisialisasi StatsService
+      StatsService(); 
   User? _currentUser;
   bool _isLoading = true;
   late Future<List<GameHistory>>
-  _gameHistoryFuture; // Future untuk riwayat game
+  _gameHistoryFuture; 
+
+ 
+  bool _showHashedPassword = false;
 
   @override
   void initState() {
@@ -43,7 +46,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (user != null) {
           _gameHistoryFuture = _statsService.getGameHistoryForUser(
             user.username,
-          );
+          ); // 'username' adalah String.
         }
       });
     }
@@ -178,8 +181,13 @@ class _ProfilePageState extends State<ProfilePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
+
+                _buildCredentialCard(context, user),
+                const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Tentang Aplikasi Lurufa'),
                 _buildAppDescription(context),
+                const SizedBox(height: 32),
+                _buildFeedbackCard(context),
                 const SizedBox(height: 32),
                 _buildSectionTitle(context, 'Riwayat Permainan'),
                 _buildGameHistoryList(),
@@ -190,6 +198,157 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ],
+    );
+  }
+
+
+  Widget _buildCredentialCard(BuildContext context, User user) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Detail Akun',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow(context, 'Username', user.username, Icons.person),
+            const SizedBox(height: 8),
+            // Dropdown untuk menampilkan hash password
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _showHashedPassword = !_showHashedPassword;
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.lock,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Password (Hashed)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      _showHashedPassword
+                          ? Icons.arrow_drop_up
+                          : Icons.arrow_drop_down,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_showHashedPassword)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(top: 8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  // Menampilkan hash password dari user object
+                  user.password,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily:
+                        'monospace', // Font monospace agar terlihat seperti hash
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, color: Theme.of(context).colorScheme.primary),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFeedbackCard(BuildContext context) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Theme.of(context).cardColor,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Saran dan Kesan Mata Kuliah TPM',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Mata kuliah Teknologi Pemrograman Mobile (TPM) ini memberikan pengalaman belajar yang sangat berharga. Materi yang diajarkan relevan dengan perkembangan teknologi saat ini, khususnya di bidang pengembangan aplikasi mobile. Dosen yang mengajar sangat kompeten dan mampu menjelaskan konsep-konsep kompleks dengan cara yang mudah dipahami. Praktikum yang diberikan juga menantang dan membantu saya mengaplikasikan teori ke dalam proyek nyata. Saran saya, mungkin bisa ditambahkan studi kasus atau proyek tim yang lebih besar untuk memperdalam pemahaman tentang kolaborasi dalam pengembangan aplikasi. Keseluruhannya, saya sangat puas dengan mata kuliah ini dan merasa siap untuk terjun ke dunia pengembangan aplikasi mobile.',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.justify,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
