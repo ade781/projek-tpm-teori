@@ -63,13 +63,11 @@ class StatsService {
 
     if (userGames.isEmpty) return UserStats();
 
-    // Kalkulasi
     final totalGames = userGames.length;
     final totalWins = userGames.where((g) => g.isWin).length;
     final winPercentage =
         totalGames > 0 ? ((totalWins / totalGames) * 100).round() : 0;
 
-    // Kalkulasi Distribusi Tebakan
     final guessDistribution = <int, int>{1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
     for (var game in userGames.where((g) => g.isWin)) {
       final attempts = game.attempts;
@@ -78,7 +76,6 @@ class StatsService {
       }
     }
 
-    // Kalkulasi Kemenangan Beruntun (Streak)
     int maxStreak = 0;
     int currentStreak = 0;
     for (var game in userGames) {
@@ -94,7 +91,6 @@ class StatsService {
     if (currentStreak > maxStreak) {
       maxStreak = currentStreak;
     }
-    // Cek apakah game terakhir menang untuk menentukan currentStreak
     if (userGames.last.isWin == false) {
       currentStreak = 0;
     }
@@ -106,5 +102,15 @@ class StatsService {
       maxStreak: maxStreak,
       guessDistribution: guessDistribution,
     );
+  }
+
+  // Fungsi baru untuk mengambil riwayat permainan berdasarkan username
+  Future<List<GameHistory>> getGameHistoryForUser(String username) async {
+    return _historyBox.values
+        .where((game) => game.username == username)
+        .sortedBy((game) => game.timestamp)
+        .toList()
+        .reversed
+        .toList(); // Tampilkan yang terbaru di atas
   }
 }
