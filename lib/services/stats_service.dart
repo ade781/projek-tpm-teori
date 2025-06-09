@@ -27,7 +27,6 @@ class StatsService {
     _historyBox = Hive.box<GameHistory>('game_history');
   }
 
-  // Menyimpan riwayat game yang baru selesai
   Future<void> saveGame(
     String correctWord,
     List<String> guesses,

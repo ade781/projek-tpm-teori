@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.projek_akhir_teori"
+        applicationId = "com.ade7.lurufa"
         // Anda dapat memperbarui nilai-nilai berikut agar sesuai dengan kebutuhan aplikasi Anda.
         // Untuk informasi lebih lanjut, lihat: https://flutter.dev/to/review-gradle-config.
         // Meningkatkan minSdkVersion ke 23 untuk memenuhi persyaratan plugin

@@ -442,18 +442,34 @@ class _AqiInfoCard extends StatelessWidget {
                 Text(
                   'Kualitas Udara Saat Ini',
                   style: TextStyle(
-                    // ignore: deprecated_member_use
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white, // Dibuat solid untuk kontras maksimal
                     fontSize: 14,
+                    fontWeight:
+                        FontWeight.w600, // Membuat teks lebih tebal (semi-bold)
+                    // Menambahkan bayangan untuk meningkatkan keterbacaan
+                    shadows: [
+                      Shadow(
+                        blurRadius: 1.0,
+                        color: Colors.black.withOpacity(0.25),
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   aqiData.cityName.split(',').first,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 1.0,
+                        color: Colors.black.withOpacity(0.2),
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),

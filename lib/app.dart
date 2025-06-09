@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:projek_akhir_teori/pages/splash_screen.dart';
 
 class MyApp extends StatelessWidget {
@@ -8,7 +7,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Tebak Kata TPM',
+      title: 'Lurufa',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,

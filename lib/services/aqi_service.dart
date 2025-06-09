@@ -29,7 +29,7 @@ class AqiService {
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
-        // Jika pengguna menolak izin lokasi
+      
         throw Exception("Izin lokasi ditolak.");
       }
     }
@@ -42,7 +42,7 @@ class AqiService {
       throw Exception("Gagal mendapatkan koordinat lokasi.");
     }
 
-    // 2. Panggil API dengan koordinat lokasi
+   
     final url = Uri.parse(
       'https://api.waqi.info/feed/geo:$lat;$lon/?token=$_apiKey',
     );

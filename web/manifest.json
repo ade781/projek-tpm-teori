@@ -1,11 +1,11 @@
 {
-    "name": "projek_akhir_teori",
-    "short_name": "projek_akhir_teori",
+    "name": "Lurufa",
+    "short_name": "Lurufa",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Aplikasi serbaguna untuk kebutuhan harian Anda.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
