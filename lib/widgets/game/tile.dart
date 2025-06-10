@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/letter_status.dart';
+import '../../models/letter_status.dart';
 
 class GameTile extends StatelessWidget {
   final String letter;

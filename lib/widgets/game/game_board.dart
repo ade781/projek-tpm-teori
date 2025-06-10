@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import '../models/letter_status.dart';
+import '../../models/letter_status.dart';
 import 'tile.dart';
 
 class GameBoard extends StatelessWidget {
