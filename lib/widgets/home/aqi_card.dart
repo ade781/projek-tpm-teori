@@ -239,3 +239,4 @@ class _AqiInfoCardAnimatedState extends State<_AqiInfoCardAnimated>
     );
   }
 }
+ 
