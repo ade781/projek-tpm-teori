@@ -12,6 +12,7 @@ class StatsPage extends StatefulWidget {
   State<StatsPage> createState() => _StatsPageState();
 }
 
+
 class _StatsPageState extends State<StatsPage> {
   final StatsService _statsService = StatsService();
   late Future<UserStats> _statsFuture;
