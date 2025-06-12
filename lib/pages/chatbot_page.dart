@@ -1,9 +1,11 @@
-import 'package:chat_bubbles/bubbles/bubble_special_three.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:lottie/lottie.dart'; // <-- 1. Tambahkan import untuk Lottie
+import '../widgets/chatbot/chat_input.dart';      // <-- Import widget baru
+import '../widgets/chatbot/loading_indicator.dart'; // <-- Import widget baru
+import '../widgets/chatbot/message_bubble.dart';   // <-- Import widget baru
 
+// Class ChatMessage tetap di sini atau bisa dipindahkan ke folder models
 class ChatMessage {
   final String text;
   final bool isFromUser;
@@ -41,7 +43,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
       debugPrint("API Key tidak ditemukan. Pastikan file .env sudah benar.");
     }
 
-    _model = GenerativeModel(model: 'gemini-2.0-flash-lite', apiKey: apiKey!);
+    _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey!);
 
     _chat = _model.startChat(
       history: [
@@ -133,16 +135,15 @@ class _ChatbotPageState extends State<ChatbotPage> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors:
-                  isDarkMode
-                      ? [
-                        const Color.fromARGB(255, 199, 110, 94),
-                        const Color.fromARGB(255, 216, 97, 136),
-                      ]
-                      : [
-                        const Color.fromARGB(255, 163, 60, 184),
-                        const Color.fromARGB(255, 138, 104, 170),
-                      ],
+              colors: isDarkMode
+                  ? [
+                      const Color.fromARGB(255, 199, 110, 94),
+                      const Color.fromARGB(255, 216, 97, 136),
+                    ]
+                  : [
+                      const Color.fromARGB(255, 163, 60, 184),
+                      const Color.fromARGB(255, 138, 104, 170),
+                    ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -151,18 +152,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient:
-              isDarkMode
-                  ? LinearGradient(
-                    colors: [Colors.grey.shade900, Colors.grey.shade800],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )
-                  : LinearGradient(
-                    colors: [Colors.grey.shade50, Colors.grey.shade100],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
+          gradient: isDarkMode
+              ? LinearGradient(
+                  colors: [Colors.grey.shade900, Colors.grey.shade800],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )
+              : LinearGradient(
+                  colors: [Colors.grey.shade50, Colors.grey.shade100],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
         ),
         child: Column(
           children: [
@@ -176,126 +176,17 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: _buildMessageBubble(message, isDarkMode: isDarkMode),
-                  );
+                  // Panggil widget MessageBubble yang sudah dibuat
+                  return MessageBubble(message: message);
                 },
               ),
             ),
             if (_isLoading)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Center(
-                  // Mengganti Row dengan Center
-                  child: Lottie.asset(
-                    'assets/chat_loading.json',
-                    width: 60,
-                    height: 60,
-                  ),
-                ),
-              ),
-            _buildChatInput(isDarkMode: isDarkMode),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageBubble(ChatMessage message, {required bool isDarkMode}) {
-    final bool isUser = message.isFromUser;
-    return BubbleSpecialThree(
-      text: message.text,
-      color:
-          isUser
-              ? isDarkMode
-                  ? Colors.teal.shade700
-                  : Colors.teal.shade600
-              : isDarkMode
-              ? Colors.grey.shade800
-              : Colors.grey.shade200,
-      tail: true,
-      isSender: isUser,
-      textStyle: TextStyle(
-        color:
-            isUser
-                ? Colors.white
-                : isDarkMode
-                ? Colors.white
-                : Colors.black87,
-        fontSize: 16,
-      ),
-    );
-  }
-
-  Widget _buildChatInput({required bool isDarkMode}) {
-    return Container(
-      padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey.shade900 : Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color:
-                      isDarkMode ? Colors.grey.shade800 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: TextField(
-                  controller: _controller,
-                  enabled: !_isLoading,
-                  decoration: InputDecoration(
-                    hintText: 'Tulis pesan...',
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    hintStyle: TextStyle(
-                      color:
-                          isDarkMode
-                              ? Colors.grey.shade400
-                              : Colors.grey.shade600,
-                    ),
-                  ),
-                  style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black87,
-                  ),
-                  onSubmitted: (_) => _sendMessage(),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.teal.withOpacity(0.3),
-                    blurRadius: 6,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                backgroundColor:
-                    isDarkMode ? Colors.teal.shade600 : Colors.teal,
-                child: IconButton(
-                  icon: const Icon(Icons.send_rounded),
-                  color: Colors.white,
-                  onPressed: _sendMessage,
-                ),
-              ),
+              const ChatLoadingIndicator(), // <-- Panggil widget loading
+            ChatInput( // <-- Panggil widget input
+              controller: _controller,
+              onSendMessage: _sendMessage,
+              isLoading: _isLoading,
             ),
           ],
         ),
