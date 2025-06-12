@@ -139,7 +139,6 @@ class ProfileHeader extends StatelessWidget {
                       ),
                     ),
 
-                    // Edit button with enhanced styling
                     AnimatedScale(
                       scale: 1.0,
                       duration: const Duration(milliseconds: 200),
@@ -183,7 +182,7 @@ class ProfileHeader extends StatelessWidget {
               ),
             ),
 
-            // Subtle overlay at the bottom
+        
             Positioned(
               bottom: 0,
               left: 0,

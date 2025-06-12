@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
-import '../widgets/chatbot/chat_input.dart';      // <-- Import widget baru
-import '../widgets/chatbot/loading_indicator.dart'; // <-- Import widget baru
-import '../widgets/chatbot/message_bubble.dart';   // <-- Import widget baru
+import '../widgets/chatbot/chat_input.dart';      
+import '../widgets/chatbot/loading_indicator.dart'; 
+import '../widgets/chatbot/message_bubble.dart';  
 
-// Class ChatMessage tetap di sini atau bisa dipindahkan ke folder models
+
 class ChatMessage {
   final String text;
   final bool isFromUser;
@@ -176,14 +176,14 @@ class _ChatbotPageState extends State<ChatbotPage> {
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
-                  // Panggil widget MessageBubble yang sudah dibuat
+            
                   return MessageBubble(message: message);
                 },
               ),
             ),
             if (_isLoading)
-              const ChatLoadingIndicator(), // <-- Panggil widget loading
-            ChatInput( // <-- Panggil widget input
+              const ChatLoadingIndicator(), 
+            ChatInput( 
               controller: _controller,
               onSendMessage: _sendMessage,
               isLoading: _isLoading,

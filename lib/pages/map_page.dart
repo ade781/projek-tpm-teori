@@ -7,11 +7,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:lottie/lottie.dart' hide Marker;
 
-// Import widget-widget yang sudah dipisah
+
 import '../widgets/map/map_control_buttons.dart';
 import '../widgets/map/place_info_panel.dart';
 import '../widgets/map/religion_filter_chips.dart';
-import '../widgets/map/map_search_bar.dart'; // <-- IMPORT WIDGET BARU
+import '../widgets/map/map_search_bar.dart'; 
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -338,7 +338,7 @@ class _MapPageState extends State<MapPage> {
                       ),
                     ],
                   ),
-                  // Gunakan widget yang sudah dibuat
+           
                   Column(
                     children: [
                       MapSearchBar(

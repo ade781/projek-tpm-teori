@@ -57,11 +57,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   Future<void> _login() async {
-    // Micro-interaction: Button press animation
+  
     _controller.reset();
     _controller.forward();
 
-    // Haptic feedback
+   
     HapticFeedback.lightImpact();
 
     final success = await _authService.loginUser(

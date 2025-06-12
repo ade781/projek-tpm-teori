@@ -1,4 +1,3 @@
-// lib/pages/register_page.dart
 
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -19,8 +18,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isConfirmPasswordVisible = false;
 
   void _register() async {
-    // --- PENAMBAHAN BLOK VALIDASI ---
-    // Memeriksa apakah field username atau password kosong
+  
     if (_usernameController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -36,7 +34,7 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ],
           ),
-          backgroundColor: Colors.red.shade600, // Warna untuk notifikasi error
+          backgroundColor: Colors.red.shade600, 
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -45,9 +43,9 @@ class _RegisterPageState extends State<RegisterPage> {
           elevation: 12,
         ),
       );
-      return; // Menghentikan eksekusi jika ada field yang kosong
+      return; 
     }
-    // --- AKHIR PENAMBAHAN ---
+  
 
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -118,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
         title: const Text('Registrasi'),
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
-        // Anda mungkin ingin memberikan warna pada AppBar agar icon back terlihat
+   
         backgroundColor: Colors.deepPurple,
       ),
       body: SingleChildScrollView(

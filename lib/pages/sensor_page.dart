@@ -1,13 +1,12 @@
-// lib/pages/sensor_page.dart
 
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sensors_plus/sensors_plus.dart';
-import 'package:projek_akhir_teori/pages/sensor_page2.dart'; // <-- IMPORT HALAMAN KEDUA
+import 'package:projek_akhir_teori/pages/sensor_page2.dart'; 
 
-// --- WIDGET UTAMA HALAMAN SENSOR ---
+
 class SensorPage extends StatelessWidget {
   const SensorPage({super.key});
 
@@ -26,13 +25,13 @@ class SensorPage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.white70,
-        // --- TOMBOL AKSI DITAMBAHKAN DI SINI ---
+     
         actions: [
           IconButton(
             icon: const Icon(Icons.view_agenda_outlined),
             tooltip: 'Ganti Tampilan',
             onPressed: () {
-              // Navigasi ke halaman sensor alternatif
+            
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SensorPage2()),
@@ -41,7 +40,7 @@ class SensorPage extends StatelessWidget {
           ),
           const SizedBox(width: 10),
         ],
-        // --- AKHIR DARI TOMBOL AKSI ---
+        
       ),
       body: Container(
         decoration: const BoxDecoration(

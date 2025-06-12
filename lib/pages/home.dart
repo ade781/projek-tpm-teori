@@ -87,7 +87,7 @@ class _HomePageState extends State<HomePage> {
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
               QuoteCard(quoteFuture: _quoteFuture),
               AqiCard(aqiFuture: _aqiFuture),
-              // Judul bagian dikembalikan di sini
+           
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),

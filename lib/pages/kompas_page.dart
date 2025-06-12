@@ -22,7 +22,7 @@ class _KompasPageState extends State<KompasPage> {
         if (mounted) {
           setState(() {
             if (event.heading != null) {
-              // Normalisasi heading ke 0-359 derajat
+          
               _heading = (event.heading! % 360 + 360) % 360;
             } else {
               _heading = null;
